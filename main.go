@@ -1,13 +1,15 @@
 package main
 
 import (
-	"image"
+	"fmt"
+	"image/color"
 	_ "image/png"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/solarlune/ldtkgo"
 )
 
@@ -15,7 +17,21 @@ var (
 	game        *Game
 	ldtkProject *ldtkgo.Project
 	floorSprite *ebiten.Image
+	grid        [8][8]uint8
 )
+
+func renderGrid(screen *ebiten.Image, grid [8][8]uint8, offsetX, offsetY float64) {
+	startingPosX := float64(screenWidth / 2)
+	startingPosY := float64(screenHeight / 2)
+	incPosition := float32(0)
+	for row, _ := range grid {
+		for col, _ := range grid[row] {
+			fmt.Println(col)
+			vector.StrokeRect(screen, float32(startingPosX+offsetX)+incPosition, float32(startingPosY+offsetY), 16, 16, 1, color.White, true)
+			incPosition += 16
+		}
+	}
+}
 
 const (
 	tileSize     = 16
@@ -36,6 +52,7 @@ type Camera struct {
 type Game struct {
 	keys   []ebiten.Key
 	camera Camera
+	grid   [8][8]uint8
 }
 
 func (g *Game) Update() error {
@@ -57,14 +74,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetX = float64(g.camera.pX) * 16 * -1
 	cameraOffsetY = float64(g.camera.pY) * 16 * -1
 
-	for _, layer := range ldtkProject.Levels[0].Layers {
-		for _, tile := range layer.Tiles {
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(tile.Position[0])+cameraOffsetX, float64(tile.Position[1])+cameraOffsetY)
-			op.GeoM.Scale(cameraScale, cameraScale)
-			screen.DrawImage(floorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
+	renderGrid(screen, g.grid, cameraOffsetX, cameraOffsetY)
+
+	/*
+		for _, layer := range ldtkProject.Levels[0].Layers {
+			for _, tile := range layer.Tiles {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Translate(float64(tile.Position[0])+cameraOffsetX, float64(tile.Position[1])+cameraOffsetY)
+				op.GeoM.Scale(cameraScale, cameraScale)
+				screen.DrawImage(floorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
+			}
 		}
-	}
+	*/
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
@@ -79,6 +100,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		default:
 		}
 	}
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
