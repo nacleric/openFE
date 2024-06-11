@@ -22,38 +22,38 @@ const (
 	GRIDSIZE = 8
 )
 
-func renderGrid(screen *ebiten.Image, grid [GRIDSIZE][GRIDSIZE]uint8, offsetX, offsetY float64) {
-	startingPosX := float64(screenWidth / 2)
-	startingPosY := float64(screenHeight / 2)
+func renderGrid(screen *ebiten.Image, grid [GRIDSIZE][GRIDSIZE]uint8, offsetX, offsetY float32) {
+	startingPosX := float32(screenWidth / 2)
+	startingPosY := float32(screenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
-	for row, _ := range grid {
-		for col, _ := range grid[row] {
-			vector.StrokeRect(screen, float32(startingPosX+offsetX)+incX, float32(startingPosY+offsetY)+incY, 16, 16, 1, color.White, true)
+	for row := range grid {
+		for col := range grid[row] {
+			vector.StrokeRect(screen, startingPosX+offsetX+incX, startingPosY+offsetY+incY, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
-				incX += 16
+				incX += 16 * cameraScale
 			} else {
 				incX = 0
-				incY += 16
+				incY += 16 * cameraScale
 			}
 		}
 	}
 }
 
 const (
-	tileSize     = 16
-	screenWidth  = 256
-	screenHeight = 128
+	tileSize     float32 = 16
+	screenWidth  int     = 256 * 2
+	screenHeight int     = 128 * 2
 
 	// Map Dimension 16 by 8 tiles
-	cameraWidth          = 16
-	cameraHeight         = 8
-	cameraScale  float64 = float64(screenWidth) / tileSize / float64(cameraWidth)
+	cameraWidth  = 16
+	cameraHeight = 8
+	cameraScale  = float32(screenWidth) / tileSize / cameraWidth
 )
 
 type Camera struct {
-	pX float64
-	pY float64
+	pX float32
+	pY float32
 }
 
 type Game struct {
@@ -75,11 +75,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
 
-	var cameraOffsetX float64
-	var cameraOffsetY float64
+	var cameraOffsetX float32
+	var cameraOffsetY float32
 
-	cameraOffsetX = float64(g.camera.pX) * 16 * -1
-	cameraOffsetY = float64(g.camera.pY) * 16 * -1
+	cameraOffsetX = g.camera.pX * 16 * -1
+	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, g.grid, cameraOffsetX, cameraOffsetY)
 
