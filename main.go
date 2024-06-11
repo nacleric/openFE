@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -17,18 +16,26 @@ var (
 	game        *Game
 	ldtkProject *ldtkgo.Project
 	floorSprite *ebiten.Image
-	grid        [8][8]uint8
 )
 
-func renderGrid(screen *ebiten.Image, grid [8][8]uint8, offsetX, offsetY float64) {
+const (
+	GRIDSIZE = 8
+)
+
+func renderGrid(screen *ebiten.Image, grid [GRIDSIZE][GRIDSIZE]uint8, offsetX, offsetY float64) {
 	startingPosX := float64(screenWidth / 2)
 	startingPosY := float64(screenHeight / 2)
-	incPosition := float32(0)
+	incX := float32(0)
+	incY := float32(0)
 	for row, _ := range grid {
 		for col, _ := range grid[row] {
-			fmt.Println(col)
-			vector.StrokeRect(screen, float32(startingPosX+offsetX)+incPosition, float32(startingPosY+offsetY), 16, 16, 1, color.White, true)
-			incPosition += 16
+			vector.StrokeRect(screen, float32(startingPosX+offsetX)+incX, float32(startingPosY+offsetY)+incY, 16, 16, 1, color.White, true)
+			if col < GRIDSIZE-1 {
+				incX += 16
+			} else {
+				incX = 0
+				incY += 16
+			}
 		}
 	}
 }
@@ -52,7 +59,7 @@ type Camera struct {
 type Game struct {
 	keys   []ebiten.Key
 	camera Camera
-	grid   [8][8]uint8
+	grid   [GRIDSIZE][GRIDSIZE]uint8
 }
 
 func (g *Game) Update() error {
