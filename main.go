@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -16,6 +17,7 @@ var (
 	game        *Game
 	ldtkProject *ldtkgo.Project
 	floorSprite *ebiten.Image
+	unitSprite  *ebiten.Image
 )
 
 const (
@@ -71,6 +73,31 @@ func (g *Game) Update() error {
 	return nil
 }
 
+/*
+func (p *Player) IdleAnimation(screen *ebiten.Image, offSetX, offSetY float64) {
+	op := &ebiten.DrawImageOptions{}
+	if p.direction == "LEFT" {
+		op.GeoM.Scale(cameraScale*-1, cameraScale)
+		op.GeoM.Translate(float64(p.idleAnim.sc.frameWidth)*cameraScale, 0)
+	} else if p.direction == "RIGHT" {
+		op.GeoM.Scale(cameraScale, cameraScale)
+	}
+
+	op.GeoM.Translate(p.posX+offSetX, p.posY+offSetY)
+
+	cellX := p.idleAnim.sc.cellX
+	cellY := p.idleAnim.sc.cellY
+
+	i := (game.count / p.idleAnim.frameFrequency) % p.idleAnim.frameCount
+	sx, sy := p.idleAnim.sc.getCol(cellX)+i*p.idleAnim.sc.frameWidth, p.idleAnim.sc.getRow(cellY)
+	screen.DrawImage(p.spritesheet.SubImage(image.Rect(sx, sy, sx+p.idleAnim.sc.frameWidth, sy+p.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
+}
+*/
+/*
+type Unit struct {
+	gridCoord
+}
+*/
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
@@ -82,7 +109,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, g.grid, cameraOffsetX, cameraOffsetY)
-
+	screen.DrawImage(floorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
 	/*
 		for _, layer := range ldtkProject.Levels[0].Layers {
 			for _, tile := range layer.Tiles {
@@ -114,6 +141,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
+func LoadSpritesheets() {
+	var err error
+	unitSprite, _, err = ebitenutil.NewImageFromFile("./assets/Characters/chicken_sprites.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func init() {
 	game = &Game{camera: Camera{0, 0}}
 	var err error
@@ -126,6 +161,8 @@ func init() {
 	if err != nil {
 		panic("Tilemap doesn't exist")
 	}
+
+	LoadSpritesheets()
 
 }
 
