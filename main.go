@@ -58,24 +58,6 @@ type Camera struct {
 	pY float32
 }
 
-type Game struct {
-	keys   []ebiten.Key
-	camera Camera
-	grid   [GRIDSIZE][GRIDSIZE]uint8
-	count  int
-	units  []Unit
-}
-
-func (g *Game) Update() error {
-	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
-	g.count++
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		panic("Game quit change this later")
-	}
-	return nil
-}
-
 type SpriteCell struct {
 	cellX       int // column of spritesheet Ex: 0 is first col 16 is 2nd col
 	cellY       int // row of spritesheet Ex: 16 is 2nd row
@@ -134,6 +116,24 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 	screen.DrawImage(u.spritesheet.SubImage(image.Rect(sx, sy, sx+u.idleAnim.sc.frameWidth, sy+u.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
 }
 
+type Game struct {
+	keys   []ebiten.Key
+	camera Camera
+	grid   [GRIDSIZE][GRIDSIZE]uint8
+	count  int
+	units  []Unit
+}
+
+func (g *Game) Update() error {
+	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
+	g.count++
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		panic("Game quit change this later")
+	}
+	return nil
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
@@ -146,15 +146,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	renderGrid(screen, g.grid, cameraOffsetX, cameraOffsetY)
 	g.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
-
-	/*
-		cellX := p.idleAnim.sc.cellX
-		cellY := p.idleAnim.sc.cellY
-
-		i := (game.count / p.idleAnim.frameFrequency) % p.idleAnim.frameCount
-		sx, sy := p.idleAnim.sc.getCol(cellX)+i*p.idleAnim.sc.frameWidth, p.idleAnim.sc.getRow(cellY)
-		screen.DrawImage(p.spritesheet.SubImage(image.Rect(sx, sy, sx+p.idleAnim.sc.frameWidth, sy+p.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
-	*/
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
