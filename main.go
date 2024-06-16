@@ -107,7 +107,7 @@ type Unit struct {
 }
 
 func CreateUnit(spritesheet *ebiten.Image) Unit {
-	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 2, 64}
+	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
 	u := Unit{
 		posX:        0,
