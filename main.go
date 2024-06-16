@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 	_ "image/png"
 	"log"
@@ -61,10 +62,13 @@ type Game struct {
 	keys   []ebiten.Key
 	camera Camera
 	grid   [GRIDSIZE][GRIDSIZE]uint8
+	count  int
+	units  []Unit
 }
 
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
+	g.count++
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
@@ -94,25 +98,40 @@ type AnimationData struct {
 }
 
 type Unit struct {
-	posX     float32
-	posY     float32
-	width    int
-	height   int
-	idleAnim AnimationData
+	posX        float32
+	posY        float32
+	width       int
+	height      int
+	idleAnim    AnimationData
+	spritesheet *ebiten.Image
 }
 
 func CreateUnit(spritesheet *ebiten.Image) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 2, 64}
 
 	u := Unit{
-		posX:     0,
-		posY:     0,
-		width:    16,
-		height:   16,
-		idleAnim: idleAnimData,
+		posX:        0,
+		posY:        0,
+		width:       16,
+		height:      16,
+		idleAnim:    idleAnimData,
+		spritesheet: spritesheet,
 	}
 
 	return u
+}
+
+func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+	op.GeoM.Translate(float64(u.posX+offsetX), float64(u.posY+offsetY))
+
+	cellX := u.idleAnim.sc.cellX
+	cellY := u.idleAnim.sc.cellY
+
+	i := (game.count / u.idleAnim.frameFrequency) % u.idleAnim.frameCount
+	sx, sy := u.idleAnim.sc.getCol(cellX)+i*u.idleAnim.sc.frameWidth, u.idleAnim.sc.getRow(cellY)
+	screen.DrawImage(u.spritesheet.SubImage(image.Rect(sx, sy, sx+u.idleAnim.sc.frameWidth, sy+u.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -126,6 +145,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, g.grid, cameraOffsetX, cameraOffsetY)
+	g.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	/*
 		cellX := p.idleAnim.sc.cellX
@@ -178,8 +198,8 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	CreateUnit(unitSprite)
-
+	u := CreateUnit(unitSprite)
+	game.units = append(game.units, u)
 }
 
 func main() {
