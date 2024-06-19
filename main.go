@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -22,21 +21,21 @@ var (
 )
 
 const (
-	GRIDSIZE = 8
+	GRIDSIZE = 4
 )
 
 func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
-	startingPosX := float32(screenWidth / 2)
-	startingPosY := float32(screenHeight / 2)
+	startingX0 := float32(screenWidth / 2)
+	startingY0 := float32(screenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
 	for row := range grid {
 		for col := range grid[row] {
-			x0 := startingPosX + offsetX + incX
-			y0 := startingPosY + offsetY + incY
-			grid[row][col].coordX = col
-			grid[row][col].coordY = row
+			x0 := startingX0 + offsetX + incX
+			y0 := startingY0 + offsetY + incY
 			grid[row][col].isOccupied = false
+			grid[row][col].x0 = x0
+			grid[row][col].y0 = y0
 			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
@@ -86,10 +85,8 @@ type AnimationData struct {
 }
 
 type Unit struct {
-	posX        float32
-	posY        float32
-	width       int
-	height      int
+	x0          float32
+	y0          float32
 	idleAnim    AnimationData
 	spritesheet *ebiten.Image
 }
@@ -98,10 +95,8 @@ func CreateUnit(spritesheet *ebiten.Image) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
 	u := Unit{
-		posX:        0,
-		posY:        0,
-		width:       16,
-		height:      16,
+		x0:          0,
+		y0:          0,
 		idleAnim:    idleAnimData,
 		spritesheet: spritesheet,
 	}
@@ -112,7 +107,7 @@ func CreateUnit(spritesheet *ebiten.Image) Unit {
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
-	op.GeoM.Translate(float64(u.posX+offsetX), float64(u.posY+offsetY))
+	op.GeoM.Translate(float64(u.x0+offsetX), float64(u.y0+offsetY))
 
 	cellX := u.idleAnim.sc.cellX
 	cellY := u.idleAnim.sc.cellY
@@ -123,8 +118,6 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 }
 
 type GridCell struct {
-	coordX     int
-	coordY     int
 	x0         float32
 	y0         float32
 	unit       *Unit
@@ -160,8 +153,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-	fmt.Println(g.grid)
-	g.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	g.grid[0][0].unit = &g.units[0]
+	g.grid[0][0].unit.x0 = g.grid[0][0].x0
+	g.grid[0][0].unit.y0 = g.grid[0][0].y0
+	g.grid[0][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	// g.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
