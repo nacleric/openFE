@@ -24,6 +24,27 @@ const (
 	GRIDSIZE = 4
 )
 
+func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
+	startingX0 := float32(screenWidth / 2)
+	startingY0 := float32(screenHeight / 2)
+	incX := float32(0)
+	incY := float32(0)
+	for row := range grid {
+		for col := range grid[row] {
+			x0 := startingX0 + incX
+			y0 := startingY0 + incY
+			grid[row][col].x0 = x0
+			grid[row][col].y0 = y0
+			if col < GRIDSIZE-1 {
+				incX += 16 * cameraScale
+			} else {
+				incX = 0
+				incY += 16 * cameraScale
+			}
+		}
+	}
+}
+
 func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
 	startingX0 := float32(screenWidth / 2)
 	startingY0 := float32(screenHeight / 2)
@@ -34,8 +55,6 @@ func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offset
 			x0 := startingX0 + offsetX + incX
 			y0 := startingY0 + offsetY + incY
 			grid[row][col].isOccupied = false
-			grid[row][col].x0 = x0
-			grid[row][col].y0 = y0
 			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
@@ -135,6 +154,7 @@ type Game struct {
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 	g.count++
+	setGridCellCoord(&g.grid)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
@@ -153,11 +173,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-	g.grid[0][0].unit = &g.units[0]
-	g.grid[0][0].unit.x0 = g.grid[0][0].x0
-	g.grid[0][0].unit.y0 = g.grid[0][0].y0
-	g.grid[0][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
-	// g.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	g.grid[1][0].unit = &g.units[0]
+	// 256, 128
+	game.grid[1][0].unit.x0 = game.grid[1][0].x0
+	game.grid[1][0].unit.y0 = game.grid[1][0].y0
+	g.grid[1][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
