@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -21,7 +22,7 @@ var (
 )
 
 const (
-	GRIDSIZE = 4
+	GRIDSIZE = 32
 )
 
 func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
@@ -70,11 +71,13 @@ const (
 	tileSize     float32 = 16
 	screenWidth  int     = 256 * 2
 	screenHeight int     = 128 * 2
+)
 
+var (
 	// Map Dimension 16 by 8 tiles
-	cameraWidth  = 16
-	cameraHeight = 8
-	cameraScale  = float32(screenWidth) / tileSize / cameraWidth
+	cameraWidth  float32 = 16
+	cameraHeight float32 = 8
+	cameraScale          = float32(screenWidth) / tileSize / cameraWidth
 )
 
 type Camera struct {
@@ -159,12 +162,23 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
+		cameraScale /= .5
+		fmt.Println(cameraScale)
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
+		cameraScale *= .5
+		fmt.Println(cameraScale)
+	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
+	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", 0, 32)
 
 	var cameraOffsetX float32
 	var cameraOffsetY float32
