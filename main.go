@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -22,7 +21,7 @@ var (
 )
 
 const (
-	GRIDSIZE = 32
+	GRIDSIZE = 3
 )
 
 func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
@@ -65,6 +64,13 @@ func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offset
 			}
 		}
 	}
+}
+
+func (pc *PlayerCursor) renderCursor(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
+	x0 := grid[pc.pY][pc.pX].x0
+	y0 := grid[pc.pY][pc.pX].y0
+	red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
 }
 
 const (
@@ -152,6 +158,7 @@ type Game struct {
 	grid   [GRIDSIZE][GRIDSIZE]GridCell
 	count  int
 	units  []Unit
+	pc     PlayerCursor
 }
 
 func (g *Game) Update() error {
@@ -165,14 +172,71 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		cameraScale /= .5
-		fmt.Println(cameraScale)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
 		cameraScale *= .5
-		fmt.Println(cameraScale)
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		g.pc.MoveCursorUp()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		g.pc.MoveCursorLeft()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		g.pc.MoveCursorDown()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		g.pc.MoveCursorRight()
+	}
+
 	return nil
+}
+
+// Cursor for grid only
+type PlayerCursor struct {
+	pX    int
+	pY    int
+	prevX int
+	prevY int
+}
+
+func (pc *PlayerCursor) MoveCursorUp() {
+	if pc.pY > 0 {
+		pc.SetPrevCursor(pc.pX, pc.pY)
+		pc.pY -= 1
+	}
+}
+
+func (pc *PlayerCursor) MoveCursorLeft() {
+	if pc.pX > 0 {
+		pc.SetPrevCursor(pc.pX, pc.pY)
+		pc.pX -= 1
+	}
+}
+
+func (pc *PlayerCursor) MoveCursorDown() {
+	if pc.pY < GRIDSIZE-1 {
+		pc.SetPrevCursor(pc.pX, pc.pY)
+		pc.pY += 1
+	}
+}
+
+func (pc *PlayerCursor) MoveCursorRight() {
+	if pc.pX < GRIDSIZE-1 {
+		pc.SetPrevCursor(pc.pX, pc.pY)
+		pc.pX += 1
+	}
+}
+
+// Might need this data for animations
+func (pc *PlayerCursor) SetPrevCursor(pX, pY int) {
+	pc.prevX = pX
+	pc.prevX = pY
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -187,11 +251,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetY = g.camera.pY * 16 * -1
 
 	renderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-	g.grid[1][0].unit = &g.units[0]
-	// 256, 128
-	game.grid[1][0].unit.x0 = game.grid[1][0].x0
-	game.grid[1][0].unit.y0 = game.grid[1][0].y0
-	g.grid[1][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	g.pc.renderCursor(screen, &g.grid, cameraOffsetX, cameraOffsetY)
+
+	g.grid[0][0].unit = &g.units[0]
+	g.grid[0][0].unit.x0 = g.grid[0][0].x0
+	g.grid[0][0].unit.y0 = g.grid[0][0].y0
+	g.grid[0][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
@@ -222,7 +287,7 @@ func LoadSpritesheets() {
 }
 
 func init() {
-	game = &Game{camera: Camera{0, 0}}
+	game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
 	var err error
 	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
 	if err != nil {
