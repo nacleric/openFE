@@ -21,7 +21,7 @@ var (
 )
 
 const (
-	GRIDSIZE = 3
+	GRIDSIZE = 5
 )
 
 func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
@@ -45,7 +45,7 @@ func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
 	}
 }
 
-func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
+func RenderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
 	startingX0 := float32(screenWidth / 2)
 	startingY0 := float32(screenHeight / 2)
 	incX := float32(0)
@@ -66,7 +66,7 @@ func renderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offset
 	}
 }
 
-func (pc *PlayerCursor) renderCursor(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
+func (pc *PlayerCursor) RenderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
 	x0 := grid[pc.pY][pc.pX].x0
 	y0 := grid[pc.pY][pc.pX].y0
 	red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
@@ -98,11 +98,11 @@ type SpriteCell struct {
 	frameHeight int
 }
 
-func (sc *SpriteCell) getRow(cellY int) int {
+func (sc *SpriteCell) GetRow(cellY int) int {
 	return cellY * sc.frameHeight
 }
 
-func (sc *SpriteCell) getCol(cellX int) int {
+func (sc *SpriteCell) GetCol(cellX int) int {
 	return cellX * sc.frameWidth
 }
 
@@ -141,7 +141,7 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 	cellY := u.idleAnim.sc.cellY
 
 	i := (game.count / u.idleAnim.frameFrequency) % u.idleAnim.frameCount
-	sx, sy := u.idleAnim.sc.getCol(cellX)+i*u.idleAnim.sc.frameWidth, u.idleAnim.sc.getRow(cellY)
+	sx, sy := u.idleAnim.sc.GetCol(cellX)+i*u.idleAnim.sc.frameWidth, u.idleAnim.sc.GetRow(cellY)
 	screen.DrawImage(u.spritesheet.SubImage(image.Rect(sx, sy, sx+u.idleAnim.sc.frameWidth, sy+u.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
 }
 
@@ -250,8 +250,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetX = g.camera.pX * 16 * -1
 	cameraOffsetY = g.camera.pY * 16 * -1
 
-	renderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-	g.pc.renderCursor(screen, &g.grid, cameraOffsetX, cameraOffsetY)
+	RenderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
+	g.pc.RenderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
 
 	g.grid[0][0].unit = &g.units[0]
 	g.grid[0][0].unit.x0 = g.grid[0][0].x0
