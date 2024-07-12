@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -106,27 +107,63 @@ func (sc *SpriteCell) GetCol(cellX int) int {
 	return cellX * sc.frameWidth
 }
 
+type Job int
+
+const (
+	SMALLFOLK Job = iota
+	NOBLE
+)
+
+type WeaponType int
+
+const (
+	BLUNT = iota
+	PIERCE
+	SLICE
+	POSITIONAL
+)
+
+type BStats struct {
+	bSpeed int
+	str    int
+}
+
+type JStats struct {
+	aSpeed   int
+	movement int
+	mounted  bool
+}
+
 type AnimationData struct {
 	sc             SpriteCell
 	frameCount     int // Total number of columns for specific row
 	frameFrequency int // How often frames transition
 }
 
-type Unit struct {
+type RenderData struct {
 	x0          float32
 	y0          float32
 	idleAnim    AnimationData
 	spritesheet *ebiten.Image
 }
 
-func CreateUnit(spritesheet *ebiten.Image) Unit {
-	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
+type Unit struct {
+	job Job
+	rd  RenderData
+}
 
-	u := Unit{
+func CreateUnit(spritesheet *ebiten.Image, j Job) Unit {
+	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
+	rd := RenderData{
 		x0:          0,
 		y0:          0,
 		idleAnim:    idleAnimData,
 		spritesheet: spritesheet,
+	}
+
+	u := Unit{
+		job: j,
+		rd:  rd,
 	}
 
 	return u
@@ -135,14 +172,14 @@ func CreateUnit(spritesheet *ebiten.Image) Unit {
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
-	op.GeoM.Translate(float64(u.x0+offsetX), float64(u.y0+offsetY))
+	op.GeoM.Translate(float64(u.rd.x0+offsetX), float64(u.rd.y0+offsetY))
 
-	cellX := u.idleAnim.sc.cellX
-	cellY := u.idleAnim.sc.cellY
+	cellX := u.rd.idleAnim.sc.cellX
+	cellY := u.rd.idleAnim.sc.cellY
 
-	i := (game.count / u.idleAnim.frameFrequency) % u.idleAnim.frameCount
-	sx, sy := u.idleAnim.sc.GetCol(cellX)+i*u.idleAnim.sc.frameWidth, u.idleAnim.sc.GetRow(cellY)
-	screen.DrawImage(u.spritesheet.SubImage(image.Rect(sx, sy, sx+u.idleAnim.sc.frameWidth, sy+u.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
+	i := (game.count / u.rd.idleAnim.frameFrequency) % u.rd.idleAnim.frameCount
+	sx, sy := u.rd.idleAnim.sc.GetCol(cellX)+i*u.rd.idleAnim.sc.frameWidth, u.rd.idleAnim.sc.GetRow(cellY)
+	screen.DrawImage(u.rd.spritesheet.SubImage(image.Rect(sx, sy, sx+u.rd.idleAnim.sc.frameWidth, sy+u.rd.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
 }
 
 type GridCell struct {
@@ -254,8 +291,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.pc.RenderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
 
 	g.grid[0][0].unit = &g.units[0]
-	g.grid[0][0].unit.x0 = g.grid[0][0].x0
-	g.grid[0][0].unit.y0 = g.grid[0][0].y0
+	g.grid[0][0].unit.rd.x0 = g.grid[0][0].x0
+	g.grid[0][0].unit.rd.y0 = g.grid[0][0].y0
 	g.grid[0][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
@@ -286,7 +323,22 @@ func LoadSpritesheets() {
 	}
 }
 
+type JobStats map[Job]JStats
+
 func init() {
+	jobs := JobStats{
+		SMALLFOLK: {
+			aSpeed:   1,
+			movement: 3,
+			mounted:  false,
+		},
+		NOBLE: {
+			aSpeed:   1,
+			movement: 4,
+			mounted:  false,
+		},
+	}
+
 	game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
 	var err error
 	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
@@ -300,7 +352,8 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	u := CreateUnit(unitSprite)
+	u := CreateUnit(unitSprite, NOBLE)
+	fmt.Println(jobs[u.job])
 	game.units = append(game.units, u)
 }
 
