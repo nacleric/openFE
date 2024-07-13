@@ -141,6 +141,8 @@ type RenderData struct {
 }
 
 type Unit struct {
+	pX  int
+	pY  int
 	job Job
 	rd  RenderData
 }
@@ -198,11 +200,12 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
 }
 
-func (mg *MGrid) MoveUnit(screen *ebiten.Image, offsetX, offsetY float32, u *Unit, new_pX, new_pY int) {
+func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-	mg.grid[new_pY][new_pX].unit.IdleAnimation(screen, offsetX, offsetY)
+	mg.grid[new_pY][new_pX].unit.pX = new_pX
+	mg.grid[new_pY][new_pX].unit.pY = new_pY
 }
 
 type Game struct {
@@ -247,6 +250,9 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println("unimplemented")
+		pX := g.mg.pc.pX
+		pY := g.mg.pc.pY
+		g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
 	}
 
 	return nil
@@ -307,8 +313,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
-	g.mg.MoveUnit(screen, cameraOffsetX, cameraOffsetY, &g.mg.units[0], 0, 0)
-	g.mg.MoveUnit(screen, cameraOffsetX, cameraOffsetY, &g.mg.units[0], 1, 1)
+	g.mg.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
