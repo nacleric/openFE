@@ -22,20 +22,20 @@ var (
 )
 
 const (
-	GRIDSIZE = 5
+	GRIDSIZE int = 5
 )
 
-func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
+func SetGridCellCoord(mg *MGrid) {
 	startingX0 := float32(screenWidth / 2)
 	startingY0 := float32(screenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
-	for row := range grid {
-		for col := range grid[row] {
+	for row := range mg.grid {
+		for col := range mg.grid[row] {
 			x0 := startingX0 + incX
 			y0 := startingY0 + incY
-			grid[row][col].x0 = x0
-			grid[row][col].y0 = y0
+			mg.grid[row][col].x0 = x0
+			mg.grid[row][col].y0 = y0
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
 			} else {
@@ -46,16 +46,16 @@ func setGridCellCoord(grid *[GRIDSIZE][GRIDSIZE]GridCell) {
 	}
 }
 
-func RenderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
+func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float32) {
 	startingX0 := float32(screenWidth / 2)
 	startingY0 := float32(screenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
-	for row := range grid {
-		for col := range grid[row] {
+	for row := range mg.grid {
+		for col := range mg.grid[row] {
 			x0 := startingX0 + offsetX + incX
 			y0 := startingY0 + offsetY + incY
-			grid[row][col].isOccupied = false
+			mg.grid[row][col].isOccupied = false
 			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
@@ -65,13 +65,6 @@ func RenderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offset
 			}
 		}
 	}
-}
-
-func (pc *PlayerCursor) RenderGrid(screen *ebiten.Image, grid *[GRIDSIZE][GRIDSIZE]GridCell, offsetX, offsetY float32) {
-	x0 := grid[pc.pY][pc.pX].x0
-	y0 := grid[pc.pY][pc.pX].y0
-	red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
 }
 
 const (
@@ -189,19 +182,40 @@ type GridCell struct {
 	isOccupied bool
 }
 
+type MGrid struct {
+	grid  [GRIDSIZE][GRIDSIZE]GridCell
+	pc    PlayerCursor
+	units []Unit
+}
+
+func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
+	pY := mg.pc.pY
+	pX := mg.pc.pX
+
+	x0 := mg.grid[pY][pX].x0
+	y0 := mg.grid[pY][pX].y0
+	red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
+}
+
+func (mg *MGrid) MoveUnit(screen *ebiten.Image, offsetX, offsetY float32, u *Unit, new_pX, new_pY int) {
+	mg.grid[new_pY][new_pX].unit = u
+	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
+	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
+	mg.grid[new_pY][new_pX].unit.IdleAnimation(screen, offsetX, offsetY)
+}
+
 type Game struct {
 	keys   []ebiten.Key
 	camera Camera
-	grid   [GRIDSIZE][GRIDSIZE]GridCell
+	mg     MGrid
 	count  int
-	units  []Unit
-	pc     PlayerCursor
 }
 
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 	g.count++
-	setGridCellCoord(&g.grid)
+	SetGridCellCoord(&g.mg)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
@@ -216,19 +230,23 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		g.pc.MoveCursorUp()
+		g.mg.pc.MoveCursorUp()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		g.pc.MoveCursorLeft()
+		g.mg.pc.MoveCursorLeft()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		g.pc.MoveCursorDown()
+		g.mg.pc.MoveCursorDown()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		g.pc.MoveCursorRight()
+		g.mg.pc.MoveCursorRight()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		fmt.Println("unimplemented")
 	}
 
 	return nil
@@ -287,13 +305,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetX = g.camera.pX * 16 * -1
 	cameraOffsetY = g.camera.pY * 16 * -1
 
-	RenderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-	g.pc.RenderGrid(screen, &g.grid, cameraOffsetX, cameraOffsetY)
-
-	g.grid[0][0].unit = &g.units[0]
-	g.grid[0][0].unit.rd.x0 = g.grid[0][0].x0
-	g.grid[0][0].unit.rd.y0 = g.grid[0][0].y0
-	g.grid[0][0].unit.IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
+	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
+	g.mg.MoveUnit(screen, cameraOffsetX, cameraOffsetY, &g.mg.units[0], 0, 0)
+	g.mg.MoveUnit(screen, cameraOffsetX, cameraOffsetY, &g.mg.units[0], 1, 1)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
@@ -339,7 +354,15 @@ func init() {
 		},
 	}
 
-	game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
+	// game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
+	// Need to fix default instantiation for mg
+	game = &Game{
+		camera: Camera{0, 0},
+		mg: MGrid{
+			pc: PlayerCursor{0, 0, 0, 0},
+		},
+	}
+
 	var err error
 	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
 	if err != nil {
@@ -354,7 +377,7 @@ func init() {
 	LoadSpritesheets()
 	u := CreateUnit(unitSprite, NOBLE)
 	fmt.Println(jobs[u.job])
-	game.units = append(game.units, u)
+	game.mg.units = append(game.mg.units, u)
 }
 
 func main() {
