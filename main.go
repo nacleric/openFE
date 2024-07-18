@@ -22,7 +22,7 @@ var (
 )
 
 const (
-	GRIDSIZE int = 5
+	GRIDSIZE int = 2
 )
 
 func SetGridCellCoord(mg *MGrid) {
@@ -81,8 +81,8 @@ var (
 )
 
 type Camera struct {
-	pX float32
-	pY float32
+	x0 float32
+	y0 float32
 }
 
 type SpriteCell struct {
@@ -219,15 +219,16 @@ func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 	g.count++
 	SetGridCellCoord(&g.mg)
-
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
 	}
 
+	// zoom in
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		cameraScale /= .5
 	}
 
+	// zoom out
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
 		cameraScale *= .5
 	}
@@ -249,7 +250,6 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		fmt.Println("unimplemented")
 		pX := g.mg.pc.pX
 		pY := g.mg.pc.pY
 		g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
@@ -308,8 +308,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	var cameraOffsetX float32
 	var cameraOffsetY float32
 
-	cameraOffsetX = g.camera.pX * 16 * -1
-	cameraOffsetY = g.camera.pY * 16 * -1
+	cameraOffsetX = g.camera.x0 * 16 * -1
+	cameraOffsetY = g.camera.y0 * 16 * -1
 
 	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
@@ -318,13 +318,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, keyPress := range g.keys {
 		switch keyPress {
 		case ebiten.KeyUp:
-			g.camera.pY += -.25
+			g.camera.y0 += -.25
 		case ebiten.KeyDown:
-			g.camera.pY += .25
+			g.camera.y0 += .25
 		case ebiten.KeyLeft:
-			g.camera.pX += -.25
+			g.camera.x0 += -.25
 		case ebiten.KeyRight:
-			g.camera.pX += .25
+			g.camera.x0 += .25
 		default:
 		}
 	}
@@ -359,6 +359,8 @@ func init() {
 		},
 	}
 
+	fmt.Println(jobs)
+
 	// game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
 	// Need to fix default instantiation for mg
 	game = &Game{
@@ -381,7 +383,6 @@ func init() {
 
 	LoadSpritesheets()
 	u := CreateUnit(unitSprite, NOBLE)
-	fmt.Println(jobs[u.job])
 	game.mg.units = append(game.mg.units, u)
 }
 
