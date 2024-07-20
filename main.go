@@ -201,11 +201,12 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 }
 
 func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+	fmt.Println(u)
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-	mg.grid[new_pY][new_pX].unit.pX = new_pX
-	mg.grid[new_pY][new_pX].unit.pY = new_pY
+	// mg.grid[new_pY][new_pX].unit.pX = new_pX
+	// mg.grid[new_pY][new_pX].unit.pY = new_pY
 }
 
 type Game struct {
@@ -247,12 +248,6 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
 		g.mg.pc.MoveCursorRight()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		pX := g.mg.pc.pX
-		pY := g.mg.pc.pY
-		g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
 	}
 
 	return nil
@@ -313,6 +308,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
+
+	// g.mg.grid[1][1].unit = &g.mg.units[0]
+	// g.mg.grid[1][1].unit.rd.x0 = g.mg.grid[1][1].x0
+	// g.mg.grid[1][1].unit.rd.y0 = g.mg.grid[1][1].y0
+	// g.mg.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		// pX := g.mg.pc.pX
+		// pY := g.mg.pc.pY
+		// g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
+
+		fmt.Println(&g.mg.units[0])
+	}
 	g.mg.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
@@ -361,7 +369,6 @@ func init() {
 
 	fmt.Println(jobs)
 
-	// game = &Game{camera: Camera{0, 0}, pc: PlayerCursor{0, 0, 0, 0}}
 	// Need to fix default instantiation for mg
 	game = &Game{
 		camera: Camera{0, 0},
