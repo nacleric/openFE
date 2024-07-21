@@ -22,7 +22,7 @@ var (
 )
 
 const (
-	GRIDSIZE int = 2
+	GRIDSIZE int = 5
 )
 
 func SetGridCellCoord(mg *MGrid) {
@@ -147,7 +147,7 @@ type Unit struct {
 	rd  RenderData
 }
 
-func CreateUnit(spritesheet *ebiten.Image, j Job) Unit {
+func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 	rd := RenderData{
 		x0:          0,
@@ -157,6 +157,8 @@ func CreateUnit(spritesheet *ebiten.Image, j Job) Unit {
 	}
 
 	u := Unit{
+		pX:  pX,
+		pY:  pY,
 		job: j,
 		rd:  rd,
 	}
@@ -200,13 +202,25 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
 }
 
+func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32) {
+	for _, unit := range mg.units {
+		mg.grid[unit.pY][unit.pX].unit = &unit
+		mg.grid[unit.pY][unit.pX].unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
+		mg.grid[unit.pY][unit.pX].unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
+		unit.IdleAnimation(screen, offsetX, offsetY)
+	}
+}
+
+// func (mg *MGrid) UpdateUnitOffsets(u *Unit) {
+
+// }
+
 func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
-	fmt.Println(u)
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-	// mg.grid[new_pY][new_pX].unit.pX = new_pX
-	// mg.grid[new_pY][new_pX].unit.pY = new_pY
+	mg.grid[new_pY][new_pX].unit.pX = new_pX
+	mg.grid[new_pY][new_pX].unit.pY = new_pY
 }
 
 type Game struct {
@@ -308,20 +322,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
-
-	// g.mg.grid[1][1].unit = &g.mg.units[0]
-	// g.mg.grid[1][1].unit.rd.x0 = g.mg.grid[1][1].x0
-	// g.mg.grid[1][1].unit.rd.y0 = g.mg.grid[1][1].y0
-	// g.mg.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
+	g.mg.RenderUnits(screen, cameraOffsetX, cameraOffsetY)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		// pX := g.mg.pc.pX
-		// pY := g.mg.pc.pY
-		// g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
-
-		fmt.Println(&g.mg.units[0])
+		pX := g.mg.pc.pX
+		pY := g.mg.pc.pY
+		g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
 	}
-	g.mg.units[0].IdleAnimation(screen, cameraOffsetX, cameraOffsetY)
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
@@ -389,7 +396,7 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	u := CreateUnit(unitSprite, NOBLE)
+	u := CreateUnit(unitSprite, NOBLE, 1, 0)
 	game.mg.units = append(game.mg.units, u)
 }
 
