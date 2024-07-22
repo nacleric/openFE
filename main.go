@@ -187,9 +187,22 @@ type GridCell struct {
 }
 
 type MGrid struct {
-	grid  [GRIDSIZE][GRIDSIZE]GridCell
-	pc    PlayerCursor
-	units []Unit
+	grid         [GRIDSIZE][GRIDSIZE]GridCell
+	pc           PlayerCursor
+	units        []Unit
+	selectedUnit *Unit
+}
+
+func (mg *MGrid) QueryUnit(pX, pY int) *Unit {
+	return mg.grid[pY][pX].unit
+}
+
+func (mg *MGrid) SetSelectedUnit(u *Unit) {
+	mg.selectedUnit = u
+}
+
+func (mg *MGrid) ClearSelectedUnit() {
+	mg.selectedUnit = nil
 }
 
 func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
@@ -198,8 +211,8 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 
 	x0 := mg.grid[pY][pX].x0
 	y0 := mg.grid[pY][pX].y0
-	red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, red, true)
+
+	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, mg.pc.cursorColor, true)
 }
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32) {
@@ -211,16 +224,22 @@ func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32) {
 	}
 }
 
-// func (mg *MGrid) UpdateUnitOffsets(u *Unit) {
-
+// Need to deprecate
+// func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+// 	mg.grid[new_pY][new_pX].unit = u
+// 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
+// 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
+// 	mg.grid[new_pY][new_pX].unit.pX = new_pX
+// 	mg.grid[new_pY][new_pX].unit.pY = new_pY
 // }
 
-func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+func (mg *MGrid) SetUnitPosV2(u *Unit, new_pX, new_pY int) {
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
 	mg.grid[new_pY][new_pX].unit.pX = new_pX
 	mg.grid[new_pY][new_pX].unit.pY = new_pY
+	mg.SetSelectedUnit(u)
 }
 
 type Game struct {
@@ -269,10 +288,33 @@ func (g *Game) Update() error {
 
 // Cursor for grid only
 type PlayerCursor struct {
-	pX    int
-	pY    int
-	prevX int
-	prevY int
+	pX          int
+	pY          int
+	prevX       int
+	prevY       int
+	cursorColor color.Color
+}
+
+type RGB int
+
+// All colors here (might be bad)
+const (
+	RED RGB = iota
+	GREEN
+	BLUE
+)
+
+func (pc *PlayerCursor) SetColor(rgb RGB) {
+	var newColor color.Color
+	// might just have all the color options here
+	if rgb == RED {
+		newColor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	} else if rgb == GREEN {
+		newColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+	} else if rgb == BLUE {
+		newColor = color.RGBA{R: 0, G: 0, B: 255, A: 255}
+	}
+	pc.cursorColor = newColor
 }
 
 func (pc *PlayerCursor) MoveCursorUp() {
@@ -325,9 +367,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.mg.RenderUnits(screen, cameraOffsetX, cameraOffsetY)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		pX := g.mg.pc.pX
-		pY := g.mg.pc.pY
-		g.mg.SetUnitPos(&g.mg.units[0], pX, pY)
+		cursor_pX := g.mg.pc.pX
+		cursor_pY := g.mg.pc.pY
+		u := g.mg.QueryUnit(cursor_pX, cursor_pY)
+
+		// nil pointer check
+		// to convert back to nil select a tile with no unit
+		if g.mg.selectedUnit == nil {
+			g.mg.SetSelectedUnit(u)
+			g.mg.pc.SetColor(BLUE)
+		} else if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
+			fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+		} else {
+			// do the actual action of moving the unit
+			g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
+			g.mg.ClearSelectedUnit()
+			g.mg.pc.SetColor(GREEN)
+		}
 	}
 
 	for _, keyPress := range g.keys {
@@ -380,7 +436,7 @@ func init() {
 	game = &Game{
 		camera: Camera{0, 0},
 		mg: MGrid{
-			pc: PlayerCursor{0, 0, 0, 0},
+			pc: PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
 		},
 	}
 
