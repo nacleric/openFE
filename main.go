@@ -193,6 +193,32 @@ type MGrid struct {
 	selectedUnit *Unit
 }
 
+func CreateMGrid() MGrid {
+	var grid [GRIDSIZE][GRIDSIZE]GridCell
+
+	for i := 0; i < GRIDSIZE; i++ {
+		for j := 0; j < GRIDSIZE; j++ {
+			grid[i][j] = GridCell{
+				x0:         float32(i),
+				y0:         float32(j),
+				unit:       nil,
+				isOccupied: false,
+			}
+		}
+	}
+
+	units := []Unit{}
+
+	mgrid := MGrid{
+		grid:         grid,
+		pc:           PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
+		units:        units,
+		selectedUnit: nil,
+	}
+
+	return mgrid
+}
+
 func (mg *MGrid) QueryUnit(pX, pY int) *Unit {
 	return mg.grid[pY][pX].unit
 }
@@ -370,7 +396,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		cursor_pX := g.mg.pc.pX
 		cursor_pY := g.mg.pc.pY
 		u := g.mg.QueryUnit(cursor_pX, cursor_pY)
-
+		fmt.Println(u)
 		// nil pointer check
 		// to convert back to nil select a tile with no unit
 		if g.mg.selectedUnit == nil {
@@ -435,9 +461,7 @@ func init() {
 	// Need to fix default instantiation for mg
 	game = &Game{
 		camera: Camera{0, 0},
-		mg: MGrid{
-			pc: PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
-		},
+		mg:     CreateMGrid(),
 	}
 
 	var err error
