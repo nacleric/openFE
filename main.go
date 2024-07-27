@@ -55,7 +55,6 @@ func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float32) {
 		for col := range mg.grid[row] {
 			x0 := startingX0 + offsetX + incX
 			y0 := startingY0 + offsetY + incY
-			mg.grid[row][col].isOccupied = false
 			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
@@ -110,7 +109,7 @@ const (
 type WeaponType int
 
 const (
-	BLUNT = iota
+	BLUNT WeaponType = iota
 	PIERCE
 	SLICE
 	POSITIONAL
@@ -180,13 +179,26 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 }
 
 type GridCell struct {
-	x0         float32
-	y0         float32
-	unit       *Unit
-	isOccupied bool
+	x0   float32
+	y0   float32
+	unit *Unit
 }
 
+// Will prob delete
+func (gc *GridCell) ClearCell() {
+	gc.unit = nil
+}
+
+type TurnState int
+
+const (
+	SELECTUNIT TurnState = iota
+	UNITACTION
+	ACTIONOPTIONS // Unused for now
+)
+
 type MGrid struct {
+	turnState    TurnState
 	grid         [GRIDSIZE][GRIDSIZE]GridCell
 	pc           PlayerCursor
 	units        []Unit
@@ -199,10 +211,9 @@ func CreateMGrid() MGrid {
 	for i := 0; i < GRIDSIZE; i++ {
 		for j := 0; j < GRIDSIZE; j++ {
 			grid[i][j] = GridCell{
-				x0:         float32(i),
-				y0:         float32(j),
-				unit:       nil,
-				isOccupied: false,
+				x0:   float32(i),
+				y0:   float32(j),
+				unit: nil,
 			}
 		}
 	}
@@ -210,6 +221,7 @@ func CreateMGrid() MGrid {
 	units := []Unit{}
 
 	mgrid := MGrid{
+		turnState:    SELECTUNIT,
 		grid:         grid,
 		pc:           PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
 		units:        units,
@@ -217,6 +229,14 @@ func CreateMGrid() MGrid {
 	}
 
 	return mgrid
+}
+
+func (mg *MGrid) SetState(ts TurnState) {
+	mg.turnState = ts
+}
+
+func (mg *MGrid) QueryCell(pX, pY int) GridCell {
+	return mg.grid[pY][pX]
 }
 
 func (mg *MGrid) QueryUnit(pX, pY int) *Unit {
@@ -396,21 +416,60 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		cursor_pX := g.mg.pc.pX
 		cursor_pY := g.mg.pc.pY
 		u := g.mg.QueryUnit(cursor_pX, cursor_pY)
-		fmt.Println(u)
-		// nil pointer check
-		// to convert back to nil select a tile with no unit
-		if g.mg.selectedUnit == nil {
-			g.mg.SetSelectedUnit(u)
-			g.mg.pc.SetColor(BLUE)
-		} else if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
-			fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
-		} else {
-			// do the actual action of moving the unit
-			g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
-			g.mg.ClearSelectedUnit()
-			g.mg.pc.SetColor(GREEN)
+
+		if g.mg.turnState == SELECTUNIT {
+			if u != nil {
+				g.mg.SetSelectedUnit(u)
+				g.mg.pc.SetColor(BLUE)
+				g.mg.SetState(UNITACTION)
+			} else {
+				fmt.Println("No unit found at the selected position")
+			}
+		} else if g.mg.turnState == UNITACTION {
+			if g.mg.selectedUnit != nil {
+				if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
+					// Something wrong here
+					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+					g.mg.ClearSelectedUnit()
+					g.mg.pc.SetColor(GREEN)
+					g.mg.SetState(SELECTUNIT)
+				} else {
+					// Ensure the units slice is not empty before accessing it
+					if len(g.mg.units) > 0 {
+						g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
+						g.mg.ClearSelectedUnit()
+						g.mg.pc.SetColor(GREEN)
+						g.mg.SetState(SELECTUNIT)
+					} else {
+						fmt.Println("No units available to move")
+						g.mg.ClearSelectedUnit()
+					}
+				}
+			}
 		}
+
 	}
+	/*
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			cursor_pX := g.mg.pc.pX
+			cursor_pY := g.mg.pc.pY
+			u := g.mg.QueryUnit(cursor_pX, cursor_pY)
+			fmt.Println(u)
+			// nil pointer check
+			// to convert back to nil select a tile with no unit
+			if g.mg.selectedUnit == nil {
+				g.mg.SetSelectedUnit(u)
+				g.mg.pc.SetColor(BLUE)
+			} else if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
+				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+			} else {
+				// do the actual action of moving the unit
+				g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
+				g.mg.ClearSelectedUnit()
+				g.mg.pc.SetColor(GREEN)
+			}
+		}
+	*/
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
