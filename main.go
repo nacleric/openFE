@@ -456,27 +456,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 	}
-	/*
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			cursor_pX := g.mg.pc.pX
-			cursor_pY := g.mg.pc.pY
-			u := g.mg.QueryUnit(cursor_pX, cursor_pY)
-			fmt.Println(u)
-			// nil pointer check
-			// to convert back to nil select a tile with no unit
-			if g.mg.selectedUnit == nil {
-				g.mg.SetSelectedUnit(u)
-				g.mg.pc.SetColor(BLUE)
-			} else if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
-				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
-			} else {
-				// do the actual action of moving the unit
-				g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
-				g.mg.ClearSelectedUnit()
-				g.mg.pc.SetColor(GREEN)
-			}
-		}
-	*/
 
 	for _, keyPress := range g.keys {
 		switch keyPress {
