@@ -26,7 +26,7 @@ var (
 )
 
 const (
-	GRIDSIZE int = 2
+	GRIDSIZE int = 4
 )
 
 func SetGridCellCoord(mg *MGrid) {
@@ -236,11 +236,12 @@ func CreateMGrid() MGrid {
 }
 
 func (mg *MGrid) ClearGridCell(pX, pY int) {
-	cell := mg.QueryCell(pX, pY)
-	fmt.Println(cell)
-	cell.ClearUnit()
-	fmt.Println(cell)
-	mg.grid[pY][pX] = cell
+	// cell := mg.QueryCell(pX, pY)
+	// fmt.Println(cell)
+	// cell.ClearUnit()
+	// fmt.Println(cell)
+	// mg.grid[pY][pX] = cell
+	mg.grid[pY][pX].ClearUnit()
 }
 
 func (mg *MGrid) SetState(ts TurnState) {
@@ -282,16 +283,8 @@ func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32) {
 	}
 }
 
-// Need to deprecate
-// func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
-// 	mg.grid[new_pY][new_pX].unit = u
-// 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
-// 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-// 	mg.grid[new_pY][new_pX].unit.pX = new_pX
-// 	mg.grid[new_pY][new_pX].unit.pY = new_pY
-// }
-
-func (mg *MGrid) SetUnitPosV2(u *Unit, new_pX, new_pY int) {
+func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+	mg.ClearGridCell(u.pX, u.pY)
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
@@ -450,8 +443,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				} else {
 					// Ensure the units slice is not empty before accessing it
 					if len(g.mg.units) > 0 {
-						g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
-						g.mg.ClearGridCell(cursor_pX, cursor_pY)
+						g.mg.SetUnitPos(&g.mg.units[0], cursor_pX, cursor_pY)
 						g.mg.ClearSelectedUnit()
 						g.mg.pc.SetColor(GREEN)
 						g.mg.SetState(SELECTUNIT)
