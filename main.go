@@ -14,6 +14,10 @@ import (
 	"github.com/solarlune/ldtkgo"
 )
 
+func Add(x, y int) int {
+	return x + y
+}
+
 var (
 	game        *Game
 	ldtkProject *ldtkgo.Project
@@ -22,7 +26,7 @@ var (
 )
 
 const (
-	GRIDSIZE int = 5
+	GRIDSIZE int = 2
 )
 
 func SetGridCellCoord(mg *MGrid) {
@@ -185,7 +189,7 @@ type GridCell struct {
 }
 
 // Will prob delete
-func (gc *GridCell) ClearCell() {
+func (gc *GridCell) ClearUnit() {
 	gc.unit = nil
 }
 
@@ -229,6 +233,14 @@ func CreateMGrid() MGrid {
 	}
 
 	return mgrid
+}
+
+func (mg *MGrid) ClearGridCell(pX, pY int) {
+	cell := mg.QueryCell(pX, pY)
+	fmt.Println(cell)
+	cell.ClearUnit()
+	fmt.Println(cell)
+	mg.grid[pY][pX] = cell
 }
 
 func (mg *MGrid) SetState(ts TurnState) {
@@ -411,11 +423,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	RenderGrid(screen, &g.mg, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.mg.RenderUnits(screen, cameraOffsetX, cameraOffsetY)
-
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		fmt.Println(g.mg.grid)
+
 		cursor_pX := g.mg.pc.pX
 		cursor_pY := g.mg.pc.pY
-		u := g.mg.QueryUnit(cursor_pX, cursor_pY)
+		cell := g.mg.QueryCell(cursor_pX, cursor_pY)
+		u := cell.unit
 
 		if g.mg.turnState == SELECTUNIT {
 			if u != nil {
@@ -437,6 +451,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					// Ensure the units slice is not empty before accessing it
 					if len(g.mg.units) > 0 {
 						g.mg.SetUnitPosV2(&g.mg.units[0], cursor_pX, cursor_pY)
+						g.mg.ClearGridCell(cursor_pX, cursor_pY)
 						g.mg.ClearSelectedUnit()
 						g.mg.pc.SetColor(GREEN)
 						g.mg.SetState(SELECTUNIT)
