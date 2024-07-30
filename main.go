@@ -26,7 +26,7 @@ var (
 )
 
 const (
-	GRIDSIZE int = 4
+	GRIDSIZE int = 2
 )
 
 func SetGridCellCoord(mg *MGrid) {
@@ -294,10 +294,28 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 }
 
 type Game struct {
-	keys   []ebiten.Key
-	camera Camera
-	mg     MGrid
-	count  int
+	keys          []ebiten.Key
+	camera        Camera
+	mg            MGrid
+	count         int
+	history       []MGrid
+	actionCounter int
+}
+
+func (g *Game) AppendHistory(mg MGrid) {
+	g.history = append(g.history, mg)
+}
+
+func (g *Game) incrementActionCounter() {
+	if g.actionCounter < len(g.history)-1 {
+		g.actionCounter += 1
+	}
+}
+
+func (g *Game) deincrementActionCounter() {
+	if g.actionCounter > 0 {
+		g.actionCounter -= 1
+	}
 }
 
 func (g *Game) Update() error {
@@ -332,6 +350,16 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
 		g.mg.pc.MoveCursorRight()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+		g.deincrementActionCounter()
+		g.mg = g.history[g.actionCounter]
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
+		g.incrementActionCounter()
+		g.mg = g.history[g.actionCounter]
 	}
 
 	return nil
@@ -435,7 +463,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		} else if g.mg.turnState == UNITACTION {
 			if g.mg.selectedUnit != nil {
 				if g.mg.selectedUnit.pX == cursor_pX && g.mg.selectedUnit.pY == cursor_pY {
-					// Something wrong here
 					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 					g.mg.ClearSelectedUnit()
 					g.mg.pc.SetColor(GREEN)
@@ -445,6 +472,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if len(g.mg.units) > 0 {
 						g.mg.SetUnitPos(&g.mg.units[0], cursor_pX, cursor_pY)
 						g.mg.ClearSelectedUnit()
+						g.AppendHistory(g.mg)
+						g.actionCounter += 1
 						g.mg.pc.SetColor(GREEN)
 						g.mg.SetState(SELECTUNIT)
 					} else {
@@ -504,10 +533,13 @@ func init() {
 	fmt.Println(jobs)
 
 	// Need to fix default instantiation for mg
+	mgrid := CreateMGrid()
 	game = &Game{
-		camera: Camera{0, 0},
-		mg:     CreateMGrid(),
+		camera:  Camera{0, 0},
+		mg:      mgrid,
+		history: []MGrid{},
 	}
+	game.AppendHistory(mgrid)
 
 	var err error
 	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
@@ -521,7 +553,7 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	u := CreateUnit(unitSprite, NOBLE, 1, 0)
+	u := CreateUnit(unitSprite, NOBLE, 0, 0)
 	game.mg.units = append(game.mg.units, u)
 }
 
