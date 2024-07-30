@@ -215,8 +215,6 @@ func CreateMGrid() MGrid {
 	for i := 0; i < GRIDSIZE; i++ {
 		for j := 0; j < GRIDSIZE; j++ {
 			grid[i][j] = GridCell{
-				x0:   float32(i),
-				y0:   float32(j),
 				unit: nil,
 			}
 		}
@@ -236,11 +234,6 @@ func CreateMGrid() MGrid {
 }
 
 func (mg *MGrid) ClearGridCell(pX, pY int) {
-	// cell := mg.QueryCell(pX, pY)
-	// fmt.Println(cell)
-	// cell.ClearUnit()
-	// fmt.Println(cell)
-	// mg.grid[pY][pX] = cell
 	mg.grid[pY][pX].ClearUnit()
 }
 
