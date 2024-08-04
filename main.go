@@ -439,7 +439,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.mg.RenderUnits(screen, cameraOffsetX, cameraOffsetY)
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		fmt.Println(g.mg.grid)
-
+		g.AppendHistory(g.mg)
 		cursor_pX := g.mg.pc.pX
 		cursor_pY := g.mg.pc.pY
 		cell := g.mg.QueryCell(cursor_pX, cursor_pY)
@@ -465,7 +465,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if len(g.mg.units) > 0 {
 						g.mg.SetUnitPos(&g.mg.units[0], cursor_pX, cursor_pY)
 						g.mg.ClearSelectedUnit()
-						g.AppendHistory(g.mg)
 						g.actionCounter += 1
 						g.mg.pc.SetColor(GREEN)
 						g.mg.SetState(SELECTUNIT)
@@ -532,7 +531,6 @@ func init() {
 		mg:      mgrid,
 		history: []MGrid{},
 	}
-	game.AppendHistory(mgrid)
 
 	var err error
 	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
