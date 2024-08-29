@@ -1,10 +1,12 @@
-package main
+package game
 
 func Add(x, y int) int {
 	return x + y
 }
 
 type Job int
+
+type JobStats map[Job]JStats
 
 const (
 	SMALLFOLK Job = iota

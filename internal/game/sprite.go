@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"image"
@@ -60,7 +60,7 @@ func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 	return u
 }
 
-func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
+func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32, count int) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
 	op.GeoM.Translate(float64(u.rd.x0+offsetX), float64(u.rd.y0+offsetY))
@@ -68,7 +68,7 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32) {
 	cellX := u.rd.idleAnim.sc.cellX
 	cellY := u.rd.idleAnim.sc.cellY
 
-	i := (game.count / u.rd.idleAnim.frameFrequency) % u.rd.idleAnim.frameCount
+	i := (count / u.rd.idleAnim.frameFrequency) % u.rd.idleAnim.frameCount
 	sx, sy := u.rd.idleAnim.sc.GetCol(cellX)+i*u.rd.idleAnim.sc.frameWidth, u.rd.idleAnim.sc.GetRow(cellY)
 	screen.DrawImage(u.rd.spritesheet.SubImage(image.Rect(sx, sy, sx+u.rd.idleAnim.sc.frameWidth, sy+u.rd.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
 }

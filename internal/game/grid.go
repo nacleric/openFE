@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"image/color"
@@ -22,7 +22,7 @@ type MGrid struct {
 	turnState    TurnState
 	grid         [GRIDSIZE][GRIDSIZE]GridCell
 	pc           PlayerCursor
-	units        []Unit
+	Units        []Unit
 	selectedUnit *Unit
 }
 
@@ -43,7 +43,7 @@ func CreateMGrid() MGrid {
 		turnState:    SELECTUNIT,
 		grid:         grid,
 		pc:           PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
-		units:        units,
+		Units:        units,
 		selectedUnit: nil,
 	}
 
@@ -84,12 +84,12 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, mg.pc.cursorColor, true)
 }
 
-func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32) {
-	for _, unit := range mg.units {
+func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, count int) {
+	for _, unit := range mg.Units {
 		mg.grid[unit.pY][unit.pX].unit = &unit
 		mg.grid[unit.pY][unit.pX].unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
 		mg.grid[unit.pY][unit.pX].unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
-		unit.IdleAnimation(screen, offsetX, offsetY)
+		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
 
@@ -104,8 +104,8 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 }
 
 func SetGridCellCoord(mg *MGrid) {
-	startingX0 := float32(screenWidth / 2)
-	startingY0 := float32(screenHeight / 2)
+	startingX0 := float32(ScreenWidth / 2)
+	startingY0 := float32(ScreenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
 	for row := range mg.grid {
@@ -125,8 +125,8 @@ func SetGridCellCoord(mg *MGrid) {
 }
 
 func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float32) {
-	startingX0 := float32(screenWidth / 2)
-	startingY0 := float32(screenHeight / 2)
+	startingX0 := float32(ScreenWidth / 2)
+	startingY0 := float32(ScreenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
 	for row := range mg.grid {
