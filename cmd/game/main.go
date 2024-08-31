@@ -9,11 +9,11 @@ import (
 	"github.com/solarlune/ldtkgo"
 
 	// Import your internal package
-	internalGame "openFE/internal/game" // Use alias to avoid conflict
+	core "openFE/internal/game" // Use alias to avoid conflict
 )
 
 var (
-	game        *internalGame.Game
+	game        *core.Game
 	ldtkProject *ldtkgo.Project
 	floorSprite *ebiten.Image
 	unitSprite  *ebiten.Image
@@ -30,11 +30,11 @@ func LoadSpritesheets() {
 func init() {
 
 	// Need to fix default instantiation for mg
-	mgrid := internalGame.CreateMGrid()
-	game = &internalGame.Game{
-		Camera:  internalGame.Camera{0, 0},
+	mgrid := core.CreateMGrid()
+	game = &core.Game{
+		Camera:  core.Camera{X: 0, Y: 0},
 		MG:      mgrid,
-		History: []internalGame.MGrid{},
+		History: []core.MGrid{},
 	}
 
 	var err error
@@ -49,12 +49,12 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	u := internalGame.CreateUnit(unitSprite, internalGame.NOBLE, 0, 0)
+	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 0)
 	game.MG.Units = append(game.MG.Units, u)
 }
 
 func main() {
-	ebiten.SetWindowSize(internalGame.ScreenWidth*2, internalGame.ScreenHeight*2)
+	ebiten.SetWindowSize(core.ScreenWidth*2, core.ScreenHeight*2)
 	ebiten.SetWindowTitle("Platformer")
 	// ebiten.SetFullscreen(true)
 
