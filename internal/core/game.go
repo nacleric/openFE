@@ -21,13 +21,13 @@ func (g *Game) AppendHistory(mg MGrid) {
 	g.History = append(g.History, mg)
 }
 
-func (g *Game) incrementActionCounter() {
+func (g *Game) IncrementActionCounter() {
 	if g.ActionCounter < len(g.History)-1 {
 		g.ActionCounter += 1
 	}
 }
 
-func (g *Game) deincrementActionCounter() {
+func (g *Game) DeincrementActionCounter() {
 	if g.ActionCounter > 0 {
 		g.ActionCounter -= 1
 	}
@@ -53,8 +53,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		fmt.Println(g.MG.grid)
-		g.AppendHistory(g.MG)
 		cursor_pX := g.MG.pc.pX
 		cursor_pY := g.MG.pc.pY
 		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
@@ -78,11 +76,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				} else {
 					// Ensure the units slice is not empty before accessing it
 					if len(g.MG.Units) > 0 {
+						// TODO: This will need to change when accounting for multiple units
 						g.MG.SetUnitPos(&g.MG.Units[0], cursor_pX, cursor_pY)
-						g.MG.ClearSelectedUnit()
-						g.ActionCounter += 1
 						g.MG.pc.SetColor(GREEN)
 						g.MG.SetState(SELECTUNIT)
+						g.AppendHistory(g.MG)
+						g.MG.Units[0].pXAppendHistory(cursor_pX)
+						g.MG.Units[0].pYAppendHistory(cursor_pY)
+						g.MG.ClearSelectedUnit()
+						g.ActionCounter += 1
 					} else {
 						fmt.Println("No units available to move")
 						g.MG.ClearSelectedUnit()
@@ -144,12 +146,12 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-		g.deincrementActionCounter()
+		g.DeincrementActionCounter()
 		g.MG = g.History[g.ActionCounter]
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
-		g.incrementActionCounter()
+		g.IncrementActionCounter()
 		g.MG = g.History[g.ActionCounter]
 	}
 

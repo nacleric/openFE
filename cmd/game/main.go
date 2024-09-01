@@ -21,7 +21,7 @@ var (
 
 func LoadSpritesheets() {
 	var err error
-	unitSprite, _, err = ebitenutil.NewImageFromFile("./assets/demo/eliwood_map_idle.png")
+	unitSprite, _, err = ebitenutil.NewImageFromFile("../../assets/demo/eliwood_map_idle.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,19 +38,22 @@ func init() {
 	}
 
 	var err error
-	ldtkProject, err = ldtkgo.Open("assets/demo/demo.ldtk")
+	ldtkProject, err = ldtkgo.Open("../../assets/demo/demo.ldtk")
 	if err != nil {
 		panic("Map file doesn't exist")
 	}
 
-	floorSprite, _, err = ebitenutil.NewImageFromFile("./assets/demo/floor.png")
+	floorSprite, _, err = ebitenutil.NewImageFromFile("../../assets/demo/floor.png")
 	if err != nil {
 		panic("Tilemap doesn't exist")
 	}
 
 	LoadSpritesheets()
-	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 0)
+	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1)
+
 	game.MG.Units = append(game.MG.Units, u)
+	game.AppendHistory(game.MG)
+	game.IncrementActionCounter()
 }
 
 func main() {

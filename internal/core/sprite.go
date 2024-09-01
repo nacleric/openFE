@@ -35,10 +35,12 @@ type RenderData struct {
 }
 
 type Unit struct {
-	pX  int
-	pY  int
-	job Job
-	rd  RenderData
+	pXHistory []int
+	pYHistory []int
+	pX        int
+	pY        int
+	job       Job
+	rd        RenderData
 }
 
 func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
@@ -51,13 +53,23 @@ func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 	}
 
 	u := Unit{
-		pX:  pX,
-		pY:  pY,
-		job: j,
-		rd:  rd,
+		pXHistory: []int{pX},
+		pYHistory: []int{pY},
+		pX:        pX,
+		pY:        pY,
+		job:       j,
+		rd:        rd,
 	}
 
 	return u
+}
+
+func (u *Unit) pXAppendHistory(pX int) {
+	u.pXHistory = append(u.pXHistory, pX)
+}
+
+func (u *Unit) pYAppendHistory(pY int) {
+	u.pYHistory = append(u.pYHistory, pY)
 }
 
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32, count int) {
