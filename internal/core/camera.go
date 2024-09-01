@@ -1,4 +1,4 @@
-package game
+package core
 
 var (
 	// Map Dimension 16 by 8 tiles

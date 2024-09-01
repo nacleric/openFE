@@ -1,4 +1,4 @@
-package game
+package core
 
 import (
 	"image/color"
@@ -10,12 +10,12 @@ import (
 type GridCell struct {
 	x0   float32
 	y0   float32
-	unit Unit
+	unit *Unit
 }
 
 // Will prob delete
 func (gc *GridCell) ClearUnit() {
-	gc.unit = Unit{}
+	gc.unit = nil
 }
 
 type MGrid struct {
@@ -23,7 +23,7 @@ type MGrid struct {
 	grid         [GRIDSIZE][GRIDSIZE]GridCell
 	pc           PlayerCursor
 	Units        []Unit
-	selectedUnit Unit
+	selectedUnit *Unit
 }
 
 func CreateMGrid() MGrid {
@@ -32,7 +32,7 @@ func CreateMGrid() MGrid {
 	for i := 0; i < GRIDSIZE; i++ {
 		for j := 0; j < GRIDSIZE; j++ {
 			grid[i][j] = GridCell{
-				unit: Unit{},
+				unit: nil,
 			}
 		}
 	}
@@ -44,7 +44,7 @@ func CreateMGrid() MGrid {
 		grid:         grid,
 		pc:           PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
 		Units:        units,
-		selectedUnit: Unit{},
+		selectedUnit: nil,
 	}
 
 	return mgrid
@@ -62,16 +62,16 @@ func (mg *MGrid) QueryCell(pX, pY int) GridCell {
 	return mg.grid[pY][pX]
 }
 
-func (mg *MGrid) QueryUnit(pX, pY int) Unit {
+func (mg *MGrid) QueryUnit(pX, pY int) *Unit {
 	return mg.grid[pY][pX].unit
 }
 
-func (mg *MGrid) SetSelectedUnit(u Unit) {
+func (mg *MGrid) SetSelectedUnit(u *Unit) {
 	mg.selectedUnit = u
 }
 
 func (mg *MGrid) ClearSelectedUnit() {
-	mg.selectedUnit = Unit{}
+	mg.selectedUnit = nil
 }
 
 func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
@@ -86,14 +86,14 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, count int) {
 	for _, unit := range mg.Units {
-		mg.grid[unit.pY][unit.pX].unit = unit
+		mg.grid[unit.pY][unit.pX].unit = &unit
 		mg.grid[unit.pY][unit.pX].unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
 		mg.grid[unit.pY][unit.pX].unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
 
-func (mg *MGrid) SetUnitPos(u Unit, new_pX, new_pY int) {
+func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 	mg.ClearGridCell(u.pX, u.pY)
 	mg.grid[new_pY][new_pX].unit = u
 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0

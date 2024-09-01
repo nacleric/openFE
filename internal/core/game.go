@@ -1,4 +1,4 @@
-package game
+package core
 
 import (
 	"fmt"
@@ -59,8 +59,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		cursor_pY := g.MG.pc.pY
 		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
 		u := cell.unit
+
 		if g.MG.turnState == SELECTUNIT {
-			if u != (Unit{}) {
+			if u != nil {
 				g.MG.SetSelectedUnit(u)
 				g.MG.pc.SetColor(BLUE)
 				g.MG.SetState(UNITACTION)
@@ -68,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				fmt.Println("No unit found at the selected position")
 			}
 		} else if g.MG.turnState == UNITACTION {
-			if g.MG.selectedUnit != (Unit{}) {
+			if g.MG.selectedUnit != nil {
 				if g.MG.selectedUnit.pX == cursor_pX && g.MG.selectedUnit.pY == cursor_pY {
 					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 					g.MG.ClearSelectedUnit()
@@ -77,7 +78,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				} else {
 					// Ensure the units slice is not empty before accessing it
 					if len(g.MG.Units) > 0 {
-						g.MG.SetUnitPos(g.MG.Units[0], cursor_pX, cursor_pY)
+						g.MG.SetUnitPos(&g.MG.Units[0], cursor_pX, cursor_pY)
 						g.MG.ClearSelectedUnit()
 						g.ActionCounter += 1
 						g.MG.pc.SetColor(GREEN)

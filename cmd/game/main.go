@@ -9,7 +9,7 @@ import (
 	"github.com/solarlune/ldtkgo"
 
 	// Import your internal package
-	core "openFE/internal/game" // Use alias to avoid conflict
+	core "openFE/internal/core" // Use alias to avoid conflict
 )
 
 var (

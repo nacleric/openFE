@@ -1,4 +1,4 @@
-package game
+package core
 
 func Add(x, y int) int {
 	return x + y

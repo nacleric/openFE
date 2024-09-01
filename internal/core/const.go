@@ -1,4 +1,4 @@
-package game
+package core
 
 const (
 	GRIDSIZE int = 2
