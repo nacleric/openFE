@@ -52,6 +52,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		fmt.Println("debugger triggered")
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_pX := g.MG.pc.pX
 		cursor_pY := g.MG.pc.pY
@@ -114,7 +117,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) Update() error {
 	g.Keys = inpututil.AppendPressedKeys(g.Keys[:0])
 	g.Count++
-	SetGridCellCoord(&g.MG)
+	SetGridCellCoord(&g.MG, MapStartingX0, MapStartingY0)
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		panic("Game quit change this later")
 	}
@@ -146,11 +149,13 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+		fmt.Println("Undo is pressed")
 		g.DeincrementActionCounter()
 		g.MG = g.History[g.ActionCounter]
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
+		fmt.Println("Redo is pressed")
 		g.IncrementActionCounter()
 		g.MG = g.History[g.ActionCounter]
 	}

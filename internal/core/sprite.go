@@ -43,8 +43,15 @@ type Unit struct {
 	rd        RenderData
 }
 
-func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
+func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int, mg *MGrid) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
+
+	// GridCellStartingX0 := MapStartingX0 + float32(16*pX)
+	// GridCellStartingY0 := MapStartingY0 + float32(16*pY)
+	// 256
+	// 160
+	// fmt.Println(GridCellStartingX0)
+	// fmt.Println(GridCellStartingY0)
 	rd := RenderData{
 		x0:          0,
 		y0:          0,

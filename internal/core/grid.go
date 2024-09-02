@@ -103,9 +103,7 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 	mg.SetSelectedUnit(u)
 }
 
-func SetGridCellCoord(mg *MGrid) {
-	startingX0 := float32(ScreenWidth / 2)
-	startingY0 := float32(ScreenHeight / 2)
+func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {
 	incX := float32(0)
 	incY := float32(0)
 	for row := range mg.grid {

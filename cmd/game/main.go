@@ -49,7 +49,7 @@ func init() {
 	}
 
 	LoadSpritesheets()
-	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1)
+	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1, &mgrid)
 
 	game.MG.Units = append(game.MG.Units, u)
 	game.AppendHistory(game.MG)
