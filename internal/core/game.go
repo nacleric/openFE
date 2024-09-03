@@ -52,6 +52,54 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
+}
+
+func (g *Game) Update() error {
+	g.Keys = inpututil.AppendPressedKeys(g.Keys[:0])
+	g.Count++
+	SetGridCellCoord(&g.MG, MapStartingX0, MapStartingY0)
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		panic("Game quit change this later")
+	}
+
+	// zoom in
+	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
+		cameraScale /= .5
+	}
+
+	// zoom out
+	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
+		cameraScale *= .5
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		g.MG.pc.MoveCursorUp()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		g.MG.pc.MoveCursorLeft()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		g.MG.pc.MoveCursorDown()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		g.MG.pc.MoveCursorRight()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
+		fmt.Println("Undo is pressed")
+		g.DeincrementActionCounter()
+		g.MG = g.History[g.ActionCounter]
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
+		fmt.Println("Redo is pressed")
+		g.IncrementActionCounter()
+		g.MG = g.History[g.ActionCounter]
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		fmt.Println("debugger triggered")
 	}
@@ -110,54 +158,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.Camera.X += .25
 		default:
 		}
-	}
-
-}
-
-func (g *Game) Update() error {
-	g.Keys = inpututil.AppendPressedKeys(g.Keys[:0])
-	g.Count++
-	SetGridCellCoord(&g.MG, MapStartingX0, MapStartingY0)
-	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		panic("Game quit change this later")
-	}
-
-	// zoom in
-	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
-		cameraScale /= .5
-	}
-
-	// zoom out
-	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
-		cameraScale *= .5
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		g.MG.pc.MoveCursorUp()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		g.MG.pc.MoveCursorLeft()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		g.MG.pc.MoveCursorDown()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		g.MG.pc.MoveCursorRight()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-		fmt.Println("Undo is pressed")
-		g.DeincrementActionCounter()
-		g.MG = g.History[g.ActionCounter]
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyV) {
-		fmt.Println("Redo is pressed")
-		g.IncrementActionCounter()
-		g.MG = g.History[g.ActionCounter]
 	}
 
 	return nil
