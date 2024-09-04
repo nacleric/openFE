@@ -26,7 +26,7 @@ type MGrid struct {
 	selectedUnit *Unit
 }
 
-func CreateMGrid() MGrid {
+func CreateMGrid(units []Unit) MGrid {
 	var grid [GRIDSIZE][GRIDSIZE]GridCell
 
 	for i := 0; i < GRIDSIZE; i++ {
@@ -37,7 +37,11 @@ func CreateMGrid() MGrid {
 		}
 	}
 
-	units := []Unit{}
+	for _, u := range units {
+		grid[u.pY][u.pX].unit = &u
+	}
+
+	// units := []Unit{}
 
 	mgrid := MGrid{
 		turnState:    SELECTUNIT,
@@ -46,6 +50,8 @@ func CreateMGrid() MGrid {
 		Units:        units,
 		selectedUnit: nil,
 	}
+
+	SetGridCellCoord(&mgrid, MapStartingX0, MapStartingY0)
 
 	return mgrid
 }
