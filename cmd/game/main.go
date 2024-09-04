@@ -28,15 +28,7 @@ func LoadSpritesheets() {
 }
 
 func init() {
-
-	// Need to fix default instantiation for mg
-	mgrid := core.CreateMGrid()
-	game = &core.Game{
-		Camera:  core.Camera{X: 0, Y: 0},
-		MG:      mgrid,
-		History: []core.MGrid{},
-	}
-
+	LoadSpritesheets()
 	var err error
 	ldtkProject, err = ldtkgo.Open("../../assets/demo/demo.ldtk")
 	if err != nil {
@@ -48,10 +40,16 @@ func init() {
 		panic("Tilemap doesn't exist")
 	}
 
-	LoadSpritesheets()
-	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1, &mgrid)
+	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1)
+	units := []core.Unit{u}
+	mgrid := core.CreateMGrid(units)
 
-	game.MG.Units = append(game.MG.Units, u)
+	game = &core.Game{
+		Camera:  core.Camera{X: 0, Y: 0},
+		MG:      mgrid,
+		History: []core.MGrid{},
+	}
+
 	game.AppendHistory(game.MG)
 	game.IncrementActionCounter()
 }
