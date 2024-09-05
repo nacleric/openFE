@@ -106,7 +106,6 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
 	mg.grid[new_pY][new_pX].unit.pX = new_pX
 	mg.grid[new_pY][new_pX].unit.pY = new_pY
-	mg.SetSelectedUnit(u)
 }
 
 func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	_ "image/png"
 	"log" // Adjust based on where these are defined
 
@@ -41,6 +42,10 @@ func init() {
 	}
 
 	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1)
+	fmt.Println(u)
+	// i := core.CreateUnit(unitSprite, core.NOBLE, 1, 0)
+	// fmt.Println(i)
+
 	units := []core.Unit{u}
 	mgrid := core.CreateMGrid(units)
 

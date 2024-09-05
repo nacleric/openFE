@@ -103,15 +103,16 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		fmt.Println("debugger triggered")
 	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_pX := g.MG.pc.pX
 		cursor_pY := g.MG.pc.pY
 		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
 		u := cell.unit
-
 		if g.MG.turnState == SELECTUNIT {
 			if u != nil {
 				g.MG.SetSelectedUnit(u)
+				fmt.Println(g.MG.selectedUnit)
 				g.MG.pc.SetColor(BLUE)
 				g.MG.SetState(UNITACTION)
 			} else {
@@ -129,6 +130,10 @@ func (g *Game) Update() error {
 					if len(g.MG.Units) > 0 {
 						// TODO: This will need to change when accounting for multiple units
 						g.MG.SetUnitPos(&g.MG.Units[0], cursor_pX, cursor_pY)
+						// fmt.Println(&g.MG.Units[0])
+						// g.MG.SetUnitPos(g.MG.selectedUnit, cursor_pX, cursor_pY)
+						// fmt.Println(g.MG.selectedUnit)
+						fmt.Println(g.MG.Units)
 						g.MG.pc.SetColor(GREEN)
 						g.MG.SetState(SELECTUNIT)
 						g.AppendHistory(g.MG)
@@ -138,12 +143,10 @@ func (g *Game) Update() error {
 						g.ActionCounter += 1
 					} else {
 						fmt.Println("No units available to move")
-						g.MG.ClearSelectedUnit()
 					}
 				}
 			}
 		}
-
 	}
 
 	for _, keyPress := range g.Keys {

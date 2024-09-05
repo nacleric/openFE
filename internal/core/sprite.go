@@ -39,8 +39,8 @@ type Unit struct {
 	pYHistory []int
 	pX        int
 	pY        int
-	job       Job
-	rd        RenderData
+	// job       Job
+	rd RenderData
 }
 
 func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
@@ -48,10 +48,7 @@ func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 
 	GridCellStartingX0 := MapStartingX0 + float32(16*pX)
 	GridCellStartingY0 := MapStartingY0 + float32(16*pY)
-	// 256
-	// 160
-	// fmt.Println(GridCellStartingX0)
-	// fmt.Println(GridCellStartingY0)
+
 	rd := RenderData{
 		x0:          GridCellStartingX0,
 		y0:          GridCellStartingY0,
@@ -64,8 +61,8 @@ func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 		pYHistory: []int{pY},
 		pX:        pX,
 		pY:        pY,
-		job:       j,
-		rd:        rd,
+		// job:       j,
+		rd: rd,
 	}
 
 	return u
