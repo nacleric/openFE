@@ -35,6 +35,7 @@ type RenderData struct {
 }
 
 type Unit struct {
+	id        int
 	pXHistory []int
 	pYHistory []int
 	pX        int
@@ -43,7 +44,7 @@ type Unit struct {
 	rd RenderData
 }
 
-func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
+func CreateUnit(id int, spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
 	GridCellStartingX0 := MapStartingX0 + float32(16*pX)
@@ -57,6 +58,7 @@ func CreateUnit(spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 	}
 
 	u := Unit{
+		id:        id,
 		pXHistory: []int{pX},
 		pYHistory: []int{pY},
 		pX:        pX,

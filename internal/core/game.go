@@ -107,20 +107,21 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_pX := g.MG.pc.pX
 		cursor_pY := g.MG.pc.pY
-		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
-		u := cell.unit
+		// cell := g.MG.QueryCell(cursor_pX, cursor_pY)
+		// u := cell.unit
+		unitId := g.MG.QueryCell(cursor_pX, cursor_pY).unitId
 		if g.MG.turnState == SELECTUNIT {
-			if u != nil {
-				g.MG.SetSelectedUnit(u)
-				fmt.Println(g.MG.selectedUnit)
+			if unitId != notSelected {
+				g.MG.SetSelectedUnit(unitId)
 				g.MG.pc.SetColor(BLUE)
 				g.MG.SetState(UNITACTION)
 			} else {
 				fmt.Println("No unit found at the selected position")
 			}
 		} else if g.MG.turnState == UNITACTION {
-			if g.MG.selectedUnit != nil {
-				if g.MG.selectedUnit.pX == cursor_pX && g.MG.selectedUnit.pY == cursor_pY {
+			if g.MG.selectedUnit != notSelected {
+				selectedUnit := g.MG.Units[g.MG.selectedUnit]
+				if selectedUnit.pX == cursor_pX && selectedUnit.pY == cursor_pY {
 					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 					g.MG.ClearSelectedUnit()
 					g.MG.pc.SetColor(GREEN)
@@ -129,7 +130,7 @@ func (g *Game) Update() error {
 					// Ensure the units slice is not empty before accessing it
 					if len(g.MG.Units) > 0 {
 						// TODO: This will need to change when accounting for multiple units
-						g.MG.SetUnitPos(&g.MG.Units[0], cursor_pX, cursor_pY)
+						g.MG.SetUnitPos(0, cursor_pX, cursor_pY)
 						// fmt.Println(&g.MG.Units[0])
 						// g.MG.SetUnitPos(g.MG.selectedUnit, cursor_pX, cursor_pY)
 						// fmt.Println(g.MG.selectedUnit)
