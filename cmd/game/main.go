@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "image/png"
 	"log" // Adjust based on where these are defined
 
@@ -41,10 +40,8 @@ func init() {
 		panic("Tilemap doesn't exist")
 	}
 
-	u := core.CreateUnit(unitSprite, core.NOBLE, 0, 1)
-	fmt.Println(u)
+	u := core.CreateUnit(0, unitSprite, core.NOBLE, 0, 1)
 	// i := core.CreateUnit(unitSprite, core.NOBLE, 1, 0)
-	// fmt.Println(i)
 
 	units := []core.Unit{u}
 	mgrid := core.CreateMGrid(units)
