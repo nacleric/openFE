@@ -1,13 +1,14 @@
 package core
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-const noUnit = -1
+const emptyCell = -1
 
 type GridCell struct {
 	x0     float32
@@ -17,7 +18,7 @@ type GridCell struct {
 
 // Will prob delete
 func (gc *GridCell) ClearUnit() {
-	gc.unitId = noUnit
+	gc.unitId = emptyCell
 }
 
 const notSelected = -1
@@ -26,21 +27,21 @@ type MGrid struct {
 	turnState    TurnState
 	grid         [GRIDSIZE][GRIDSIZE]GridCell
 	pc           PlayerCursor
-	Units        []Unit
-	selectedUnit int //Id
+	Units        []*Unit
+	selectedUnit int // UnitID, it is -1 if there is no selected unit
 }
 
 func (mg *MGrid) SearchUnit() {
 
 }
 
-func CreateMGrid(units []Unit) MGrid {
+func CreateMGrid(units []*Unit) MGrid {
 	var grid [GRIDSIZE][GRIDSIZE]GridCell
 
 	for i := 0; i < GRIDSIZE; i++ {
 		for j := 0; j < GRIDSIZE; j++ {
 			grid[i][j] = GridCell{
-				unitId: noUnit,
+				unitId: emptyCell,
 			}
 		}
 	}
@@ -48,8 +49,6 @@ func CreateMGrid(units []Unit) MGrid {
 	for _, u := range units {
 		grid[u.pY][u.pX].unitId = u.id
 	}
-
-	// units := []Unit{}
 
 	mgrid := MGrid{
 		turnState:    SELECTUNIT,
@@ -100,33 +99,23 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, count int) {
 	for _, unit := range mg.Units {
-		unitId := mg.grid[unit.pY][unit.pX].unitId
-		unit := mg.Units[unitId]
-
 		unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
 		unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
 
-// func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
-// 	mg.ClearGridCell(u.pX, u.pY)
-// 	mg.grid[new_pY][new_pX].unit = u
-// 	mg.grid[new_pY][new_pX].unit.rd.x0 = mg.grid[new_pY][new_pX].x0
-// 	mg.grid[new_pY][new_pX].unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-// 	mg.grid[new_pY][new_pX].unit.pX = new_pX
-// 	mg.grid[new_pY][new_pX].unit.pY = new_pY
-// }
+func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+	mg.ClearGridCell(u.pX, u.pY)
+	newGridCellPos := &mg.grid[new_pY][new_pX]
 
-func (mg *MGrid) SetUnitPos(unitId int, new_pX, new_pY int) {
-	unit := mg.Units[unitId]
-	mg.ClearGridCell(unit.pX, unit.pY)
 	// New grid location
-	mg.grid[new_pY][new_pX].unitId = unitId
-	unit.rd.x0 = mg.grid[new_pY][new_pX].x0
-	unit.rd.y0 = mg.grid[new_pY][new_pX].y0
-	unit.pX = new_pX
-	unit.pY = new_pY
+	newGridCellPos.unitId = u.id
+	fmt.Println(newGridCellPos.unitId)
+	u.rd.x0 = newGridCellPos.x0
+	u.rd.y0 = newGridCellPos.y0
+	u.pX = new_pX
+	u.pY = new_pY
 }
 
 func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {

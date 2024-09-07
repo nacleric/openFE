@@ -41,10 +41,14 @@ func init() {
 	}
 
 	u := core.CreateUnit(0, unitSprite, core.NOBLE, 0, 1)
-	// i := core.CreateUnit(unitSprite, core.NOBLE, 1, 0)
+	i := core.CreateUnit(1, unitSprite, core.NOBLE, 1, 0)
 
-	units := []core.Unit{u}
-	mgrid := core.CreateMGrid(units)
+	units := []core.Unit{u, i}
+	unitPointers := make([]*core.Unit, len(units))
+	for i := range units {
+		unitPointers[i] = &units[i]
+	}
+	mgrid := core.CreateMGrid(unitPointers)
 
 	game = &core.Game{
 		Camera:  core.Camera{X: 0, Y: 0},

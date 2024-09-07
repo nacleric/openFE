@@ -107,45 +107,32 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_pX := g.MG.pc.pX
 		cursor_pY := g.MG.pc.pY
-		// cell := g.MG.QueryCell(cursor_pX, cursor_pY)
-		// u := cell.unit
-		unitId := g.MG.QueryCell(cursor_pX, cursor_pY).unitId
+		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
 		if g.MG.turnState == SELECTUNIT {
-			if unitId != notSelected {
-				g.MG.SetSelectedUnit(unitId)
+			if cell.unitId != notSelected {
+				g.MG.SetSelectedUnit(cell.unitId)
 				g.MG.pc.SetColor(BLUE)
 				g.MG.SetState(UNITACTION)
 			} else {
 				fmt.Println("No unit found at the selected position")
 			}
 		} else if g.MG.turnState == UNITACTION {
-			if g.MG.selectedUnit != notSelected {
-				selectedUnit := g.MG.Units[g.MG.selectedUnit]
-				if selectedUnit.pX == cursor_pX && selectedUnit.pY == cursor_pY {
-					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
-					g.MG.ClearSelectedUnit()
-					g.MG.pc.SetColor(GREEN)
-					g.MG.SetState(SELECTUNIT)
-				} else {
-					// Ensure the units slice is not empty before accessing it
-					if len(g.MG.Units) > 0 {
-						// TODO: This will need to change when accounting for multiple units
-						g.MG.SetUnitPos(0, cursor_pX, cursor_pY)
-						// fmt.Println(&g.MG.Units[0])
-						// g.MG.SetUnitPos(g.MG.selectedUnit, cursor_pX, cursor_pY)
-						// fmt.Println(g.MG.selectedUnit)
-						fmt.Println(g.MG.Units)
-						g.MG.pc.SetColor(GREEN)
-						g.MG.SetState(SELECTUNIT)
-						g.AppendHistory(g.MG)
-						g.MG.Units[0].pXAppendHistory(cursor_pX)
-						g.MG.Units[0].pYAppendHistory(cursor_pY)
-						g.MG.ClearSelectedUnit()
-						g.ActionCounter += 1
-					} else {
-						fmt.Println("No units available to move")
-					}
-				}
+			selectedUnitId := g.MG.selectedUnit
+			selectedUnit := g.MG.Units[selectedUnitId]
+			if selectedUnit.pX == cursor_pX && selectedUnit.pY == cursor_pY {
+				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+				g.MG.ClearSelectedUnit()
+				g.MG.pc.SetColor(GREEN)
+				g.MG.SetState(SELECTUNIT)
+			} else {
+				g.MG.SetUnitPos(selectedUnit, cursor_pX, cursor_pY)
+				g.MG.pc.SetColor(GREEN)
+				g.MG.SetState(SELECTUNIT)
+				g.AppendHistory(g.MG)
+				g.MG.Units[selectedUnit.id].pXAppendHistory(cursor_pX)
+				g.MG.Units[selectedUnit.id].pYAppendHistory(cursor_pY)
+				g.MG.ClearSelectedUnit()
+				g.ActionCounter += 1
 			}
 		}
 	}
