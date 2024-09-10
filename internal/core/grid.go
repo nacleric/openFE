@@ -138,14 +138,12 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {
 }
 
 func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float32) {
-	startingX0 := float32(ScreenWidth / 2)
-	startingY0 := float32(ScreenHeight / 2)
 	incX := float32(0)
 	incY := float32(0)
 	for row := range mg.grid {
 		for col := range mg.grid[row] {
-			x0 := startingX0 + offsetX + incX
-			y0 := startingY0 + offsetY + incY
+			x0 := MapStartingX0 + offsetX + incX
+			y0 := MapStartingY0 + offsetY + incY
 			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale

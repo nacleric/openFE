@@ -2,11 +2,19 @@ package core
 
 import (
 	"fmt"
+	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
+
+func DebugMessages(screen *ebiten.Image) {
+	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
+	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
+	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", 0, 32)
+	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", 0, 48)
+}
 
 type Game struct {
 	Keys          []ebiten.Key
@@ -38,20 +46,24 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
-	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", 0, 32)
-	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", 0, 48)
-
 	var cameraOffsetX float32
 	var cameraOffsetY float32
 
 	cameraOffsetX = g.Camera.X * 16 * -1
 	cameraOffsetY = g.Camera.Y * 16 * -1
 
+	for _, layer := range LdtkProject.Levels[0].Layers {
+		for _, tile := range layer.Tiles {
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(MapStartingX0)+(float64(tile.Position[0])+float64(cameraOffsetX)), (float64(MapStartingY0) + float64(tile.Position[1]) + float64(cameraOffsetY)))
+			op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+			screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
+		}
+	}
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	DebugMessages(screen)
 }
 
 func (g *Game) Update() error {
