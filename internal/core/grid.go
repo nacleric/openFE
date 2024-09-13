@@ -128,7 +128,7 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {
 			mg.grid[row][col].x0 = x0
 			mg.grid[row][col].y0 = y0
 			if col < GRIDSIZE-1 {
-				incX += 16 * cameraScale
+				incX += 16 * cameraScale // No Idea why I needed to multiply this
 			} else {
 				incX = 0
 				incY += 16 * cameraScale

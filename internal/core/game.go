@@ -54,8 +54,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, layer := range LdtkProject.Levels[0].Layers {
 		for _, tile := range layer.Tiles {
+			x0 := float32(tile.Position[0])
+			y0 := float32(tile.Position[1])
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(MapStartingX0)+(float64(tile.Position[0])+float64(cameraOffsetX)), (float64(MapStartingY0) + float64(tile.Position[1]) + float64(cameraOffsetY)))
+
+			// No idea why I needed to divide by camerascale
+			// in order to fix zoomin zoomout when I didn't need to do that for unitsprite
+			op.GeoM.Translate(float64(x0+cameraOffsetX/cameraScale), float64(y0+cameraOffsetY/cameraScale))
 			op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
 			screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
 		}
