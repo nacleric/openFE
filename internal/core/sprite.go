@@ -40,11 +40,11 @@ type Unit struct {
 	pYHistory []int
 	pX        int
 	pY        int
-	// job       Job
-	rd RenderData
+	rpg       RPG
+	rd        RenderData
 }
 
-func CreateUnit(id int, spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
+func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, pX, pY int) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
 	GridCellStartingX0 := MapStartingX0 + float32(16*pX)
@@ -63,8 +63,8 @@ func CreateUnit(id int, spritesheet *ebiten.Image, j Job, pX, pY int) Unit {
 		pYHistory: []int{pY},
 		pX:        pX,
 		pY:        pY,
-		// job:       j,
-		rd: rd,
+		rpg:       rpg,
+		rd:        rd,
 	}
 
 	return u

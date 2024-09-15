@@ -6,29 +6,13 @@ func Add(x, y int) int {
 
 type Job int
 
-type JobStats map[Job]JStats
-
 const (
-	SMALLFOLK Job = iota
+	HOPLITE Job = iota
+	GAMBLER
 	NOBLE
 )
 
-type WeaponType int
-
-const (
-	BLUNT WeaponType = iota
-	PIERCE
-	SLICE
-	POSITIONAL
-)
-
-type BStats struct {
-	bSpeed int
-	str    int
-}
-
-type JStats struct {
-	aSpeed   int
-	movement int
-	mounted  bool
+type RPG struct {
+	Job      Job
+	Movement int
 }

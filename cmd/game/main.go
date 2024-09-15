@@ -17,8 +17,9 @@ var (
 func init() {
 	core.LoadSpritesheets()
 
-	u := core.CreateUnit(0, core.UnitSprite, core.NOBLE, 0, 1)
-	i := core.CreateUnit(1, core.UnitSprite, core.NOBLE, 1, 0)
+	unitInfo := core.RPG{Job: core.NOBLE, Movement: 2}
+	u := core.CreateUnit(0, core.UnitSprite, unitInfo, 0, 1)
+	i := core.CreateUnit(1, core.UnitSprite, unitInfo, 1, 0)
 
 	units := []core.Unit{u, i}
 	unitPointers := make([]*core.Unit, len(units))

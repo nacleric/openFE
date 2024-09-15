@@ -106,6 +106,8 @@ func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, cou
 }
 
 func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
+	distance := u.rpg.Movement
+
 	mg.ClearGridCell(u.pX, u.pY)
 	newGridCellPos := &mg.grid[new_pY][new_pX]
 
