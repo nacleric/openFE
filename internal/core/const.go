@@ -5,7 +5,7 @@ const (
 )
 
 const (
-	TileSize float32 = 16
+	TileSize float64 = 16
 	// ScreenWidth  int     = 256 * 2
 	// ScreenHeight int     = 128 * 2
 	ScreenWidth  int = 800
@@ -19,6 +19,6 @@ const (
 // )
 
 const (
-	MapStartingX0 float32 = 0
+	MapStartingX0 float64 = 0
 	MapStartingY0         = 0
 )

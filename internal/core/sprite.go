@@ -4,6 +4,7 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/math/f64"
 )
 
 type SpriteCell struct {
@@ -28,8 +29,9 @@ type AnimationData struct {
 }
 
 type RenderData struct {
-	x0          float32
-	y0          float32
+	_x0         float32
+	_y0         float32
+	x0y0        f64.Vec2
 	idleAnim    AnimationData
 	spritesheet *ebiten.Image
 }
@@ -47,12 +49,11 @@ type Unit struct {
 func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, pX, pY int) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
-	GridCellStartingX0 := MapStartingX0 + float32(16*pX)
-	GridCellStartingY0 := MapStartingY0 + float32(16*pY)
+	GridCellStartingX0 := MapStartingX0 + float64(16*pX)
+	GridCellStartingY0 := MapStartingY0 + float64(16*pY)
 
 	rd := RenderData{
-		x0:          GridCellStartingX0,
-		y0:          GridCellStartingY0,
+		x0y0:        f64.Vec2{GridCellStartingX0, GridCellStartingY0},
 		idleAnim:    idleAnimData,
 		spritesheet: spritesheet,
 	}

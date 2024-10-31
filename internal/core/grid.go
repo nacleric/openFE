@@ -6,13 +6,14 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/math/f64"
 )
 
 const emptyCell = -1
 
 type GridCell struct {
-	x0     float32
-	y0     float32
+	x0y0   f64.Vec2
+	_y0    float32
 	unitId int
 }
 
@@ -91,10 +92,11 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 	pY := mg.pc.pY
 	pX := mg.pc.pX
 
-	x0 := mg.grid[pY][pX].x0
-	y0 := mg.grid[pY][pX].y0
+	// x0 := mg.grid[pY][pX].x0
+	// y0 := mg.grid[pY][pX].y0
+	x0y0 := mg.grid[pY][pX].x0y0
 
-	vector.StrokeRect(screen, x0+offsetX, y0+offsetY, 16*cameraScale, 16*cameraScale, 1, mg.pc.cursorColor, true)
+	vector.StrokeRect(screen, float32(x0y0[0])+offsetX, float32(x0y0[1])+offsetY, 16*cameraScale, 16*cameraScale, 1, mg.pc.cursorColor, true)
 }
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, count int) {
@@ -106,7 +108,7 @@ func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, cou
 }
 
 func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
-	distance := u.rpg.Movement
+	// distance := u.rpg.Movement
 
 	mg.ClearGridCell(u.pX, u.pY)
 	newGridCellPos := &mg.grid[new_pY][new_pX]
@@ -114,21 +116,23 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
 	// New grid location
 	newGridCellPos.unitId = u.id
 	fmt.Println(newGridCellPos.unitId)
-	u.rd.x0 = newGridCellPos.x0
-	u.rd.y0 = newGridCellPos.y0
+	// u.rd.x0 = newGridCellPos.x0
+	// u.rd.y0 = newGridCellPos.y0
+	u.rd.x0y0 = newGridCellPos.x0y0
 	u.pX = new_pX
 	u.pY = new_pY
 }
 
-func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {
-	incX := float32(0)
-	incY := float32(0)
+func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
+	incX := float64(0)
+	incY := float64(0)
 	for row := range mg.grid {
 		for col := range mg.grid[row] {
 			x0 := startingX0 + incX
 			y0 := startingY0 + incY
-			mg.grid[row][col].x0 = x0
-			mg.grid[row][col].y0 = y0
+			// mg.grid[row][col].x0 = x0
+			// mg.grid[row][col].y0 = y0
+			mg.grid[row][col].x0y0 = f64.Vec2{x0, y0}
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale // No Idea why I needed to multiply this
 			} else {
@@ -139,9 +143,9 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float32) {
 	}
 }
 
-func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float32) {
-	incX := float32(0)
-	incY := float32(0)
+func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float64) {
+	incX := float64(0)
+	incY := float64(0)
 	for row := range mg.grid {
 		for col := range mg.grid[row] {
 			x0 := MapStartingX0 + offsetX + incX

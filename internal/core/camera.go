@@ -2,9 +2,9 @@ package core
 
 var (
 	// Map Dimension 16 by 8 tiles
-	cameraWidth  float32 = 16
-	cameraHeight float32 = 8
-	cameraScale          = float32(ScreenWidth) / TileSize / cameraWidth
+	cameraWidth  float64 = 16
+	cameraHeight float64 = 8
+	cameraScale          = float64(ScreenWidth) / TileSize / cameraWidth
 )
 
 type Camera struct {

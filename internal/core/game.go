@@ -7,7 +7,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"golang.org/x/image/math/f32"
+	"golang.org/x/image/math/f64"
 )
+
+// just here so it doesn't go away
+type _foo struct {
+	v2_f64 f64.Vec2
+	v2_f32 f32.Vec2
+}
 
 func DebugMessages(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
