@@ -88,7 +88,10 @@ func (mg *MGrid) ClearSelectedUnit() {
 	mg.selectedUnit = notSelected
 }
 
-func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
+func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64) {
+	f32cameraScale := float32(cameraScale)
+	f32offsetX := float32(offsetX)
+	f32offsetY := float32(offsetY)
 	pY := mg.pc.pY
 	pX := mg.pc.pX
 
@@ -96,13 +99,15 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float32) {
 	// y0 := mg.grid[pY][pX].y0
 	x0y0 := mg.grid[pY][pX].x0y0
 
-	vector.StrokeRect(screen, float32(x0y0[0])+offsetX, float32(x0y0[1])+offsetY, 16*cameraScale, 16*cameraScale, 1, mg.pc.cursorColor, true)
+	vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
 }
 
-func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float32, count int) {
+func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	for _, unit := range mg.Units {
-		unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
-		unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
+		// unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
+		// unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
+		unit.rd.x0y0 = mg.grid[unit.pY][unit.pX].x0y0
+
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
@@ -146,11 +151,12 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float64) {
 	incX := float64(0)
 	incY := float64(0)
+	f32cameraScale := float32(cameraScale)
 	for row := range mg.grid {
 		for col := range mg.grid[row] {
 			x0 := MapStartingX0 + offsetX + incX
 			y0 := MapStartingY0 + offsetY + incY
-			vector.StrokeRect(screen, x0, y0, 16*cameraScale, 16*cameraScale, 1, color.White, true)
+			vector.StrokeRect(screen, float32(x0), float32(y0), 16*f32cameraScale, 16*f32cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale
 			} else {

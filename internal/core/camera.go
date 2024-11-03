@@ -8,6 +8,6 @@ var (
 )
 
 type Camera struct {
-	X float32
-	Y float32
+	X float64
+	Y float64
 }

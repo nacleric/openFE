@@ -79,10 +79,12 @@ func (u *Unit) pYAppendHistory(pY int) {
 	u.pYHistory = append(u.pYHistory, pY)
 }
 
-func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float32, count int) {
+func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
-	op.GeoM.Translate(float64(u.rd.x0+offsetX), float64(u.rd.y0+offsetY))
+	x0 := u.rd.x0y0[0]
+	y0 := u.rd.x0y0[1]
+	op.GeoM.Translate(x0+offsetX, y0+offsetY)
 
 	cellX := u.rd.idleAnim.sc.cellX
 	cellY := u.rd.idleAnim.sc.cellY

@@ -7,15 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"golang.org/x/image/math/f32"
-	"golang.org/x/image/math/f64"
 )
-
-// just here so it doesn't go away
-type _foo struct {
-	v2_f64 f64.Vec2
-	v2_f32 f32.Vec2
-}
 
 func DebugMessages(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
@@ -54,16 +46,16 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	var cameraOffsetX float32
-	var cameraOffsetY float32
+	var cameraOffsetX float64
+	var cameraOffsetY float64
 
 	cameraOffsetX = g.Camera.X * 16 * -1
 	cameraOffsetY = g.Camera.Y * 16 * -1
 
 	for _, layer := range LdtkProject.Levels[0].Layers {
 		for _, tile := range layer.Tiles {
-			x0 := float32(tile.Position[0])
-			y0 := float32(tile.Position[1])
+			x0 := float64(tile.Position[0])
+			y0 := float64(tile.Position[1])
 			op := &ebiten.DrawImageOptions{}
 
 			// No idea why I needed to divide by camerascale
