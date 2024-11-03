@@ -13,7 +13,6 @@ const emptyCell = -1
 
 type GridCell struct {
 	x0y0   f64.Vec2
-	_y0    float32
 	unitId int
 }
 
@@ -48,13 +47,15 @@ func CreateMGrid(units []*Unit) MGrid {
 	}
 
 	for _, u := range units {
-		grid[u.pY][u.pX].unitId = u.id
+		pX := u.posXY[0]
+		pY := u.posXY[1]
+		grid[pY][pX].unitId = u.id
 	}
 
 	mgrid := MGrid{
 		turnState:    SELECTUNIT,
 		grid:         grid,
-		pc:           PlayerCursor{0, 0, 0, 0, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
+		pc:           PlayerCursor{PosXY{0, 0}, PosXY{0, 0}, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
 		Units:        units,
 		selectedUnit: notSelected,
 	}
@@ -72,7 +73,9 @@ func (mg *MGrid) SetState(ts TurnState) {
 	mg.turnState = ts
 }
 
-func (mg *MGrid) QueryCell(pX, pY int) GridCell {
+func (mg *MGrid) QueryCell(posXY PosXY) GridCell {
+	pX := posXY[0]
+	pY := posXY[1]
 	return mg.grid[pY][pX]
 }
 
@@ -92,11 +95,9 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64) {
 	f32cameraScale := float32(cameraScale)
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
-	pY := mg.pc.pY
-	pX := mg.pc.pX
+	pX := mg.pc.posXY[0]
+	pY := mg.pc.posXY[1]
 
-	// x0 := mg.grid[pY][pX].x0
-	// y0 := mg.grid[pY][pX].y0
 	x0y0 := mg.grid[pY][pX].x0y0
 
 	vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
@@ -104,28 +105,26 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64) {
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	for _, unit := range mg.Units {
-		// unit.rd.x0 = mg.grid[unit.pY][unit.pX].x0
-		// unit.rd.y0 = mg.grid[unit.pY][unit.pX].y0
-		unit.rd.x0y0 = mg.grid[unit.pY][unit.pX].x0y0
+		pX := unit.posXY[0]
+		pY := unit.posXY[1]
+		unit.rd.x0y0 = mg.grid[pY][pX].x0y0
 
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
 
-func (mg *MGrid) SetUnitPos(u *Unit, new_pX, new_pY int) {
-	// distance := u.rpg.Movement
-
-	mg.ClearGridCell(u.pX, u.pY)
+func (mg *MGrid) SetUnitPos(u *Unit, new_posXY PosXY) {
+	new_pX := new_posXY[0]
+	new_pY := new_posXY[1]
+	mg.ClearGridCell(u.posXY[0], u.posXY[1])
 	newGridCellPos := &mg.grid[new_pY][new_pX]
 
 	// New grid location
 	newGridCellPos.unitId = u.id
 	fmt.Println(newGridCellPos.unitId)
-	// u.rd.x0 = newGridCellPos.x0
-	// u.rd.y0 = newGridCellPos.y0
 	u.rd.x0y0 = newGridCellPos.x0y0
-	u.pX = new_pX
-	u.pY = new_pY
+	newPos := PosXY{new_pX, new_pY}
+	u.posXY = newPos
 }
 
 func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
@@ -135,8 +134,6 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 		for col := range mg.grid[row] {
 			x0 := startingX0 + incX
 			y0 := startingY0 + incY
-			// mg.grid[row][col].x0 = x0
-			// mg.grid[row][col].y0 = y0
 			mg.grid[row][col].x0y0 = f64.Vec2{x0, y0}
 			if col < GRIDSIZE-1 {
 				incX += 16 * cameraScale // No Idea why I needed to multiply this
@@ -177,10 +174,8 @@ const (
 
 // Cursor for grid only
 type PlayerCursor struct {
-	pX          int
-	pY          int
-	prevX       int
-	prevY       int
+	posXY       PosXY
+	prevXY      PosXY
 	cursorColor color.Color
 }
 
@@ -207,35 +202,34 @@ func (pc *PlayerCursor) SetColor(rgb RGB) {
 }
 
 func (pc *PlayerCursor) MoveCursorUp() {
-	if pc.pY > 0 {
-		pc.SetPrevCursor(pc.pX, pc.pY)
-		pc.pY -= 1
+	if pc.posXY[1] > 0 {
+		pc.SetPrevCursor(pc.posXY)
+		pc.posXY[1] -= 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorLeft() {
-	if pc.pX > 0 {
-		pc.SetPrevCursor(pc.pX, pc.pY)
-		pc.pX -= 1
+	if pc.posXY[0] > 0 {
+		pc.SetPrevCursor(pc.posXY)
+		pc.posXY[1] -= 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorDown() {
-	if pc.pY < GRIDSIZE-1 {
-		pc.SetPrevCursor(pc.pX, pc.pY)
-		pc.pY += 1
+	if pc.posXY[1] < GRIDSIZE-1 {
+		pc.SetPrevCursor(pc.posXY)
+		pc.posXY[1] += 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorRight() {
-	if pc.pX < GRIDSIZE-1 {
-		pc.SetPrevCursor(pc.pX, pc.pY)
-		pc.pX += 1
+	if pc.posXY[0] < GRIDSIZE-1 {
+		pc.SetPrevCursor(pc.posXY)
+		pc.posXY[0] += 1
 	}
 }
 
 // Might need this data for animations
-func (pc *PlayerCursor) SetPrevCursor(pX, pY int) {
-	pc.prevX = pX
-	pc.prevX = pY
+func (pc *PlayerCursor) SetPrevCursor(posXY PosXY) {
+	pc.prevXY = posXY
 }

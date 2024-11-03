@@ -122,9 +122,10 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		cursor_pX := g.MG.pc.pX
-		cursor_pY := g.MG.pc.pY
-		cell := g.MG.QueryCell(cursor_pX, cursor_pY)
+		cursor_posXY := g.MG.pc.posXY
+		cursor_posX := cursor_posXY[0]
+		cursor_posY := cursor_posXY[1]
+		cell := g.MG.QueryCell(cursor_posXY)
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)
@@ -136,18 +137,19 @@ func (g *Game) Update() error {
 		} else if g.MG.turnState == UNITACTION {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
-			if selectedUnit.pX == cursor_pX && selectedUnit.pY == cursor_pY {
+			if selectedUnit.posXY[0] == cursor_posX && selectedUnit.posXY[1] == cursor_posY {
 				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 				g.MG.ClearSelectedUnit()
 				g.MG.pc.SetColor(GREEN)
 				g.MG.SetState(SELECTUNIT)
 			} else {
-				g.MG.SetUnitPos(selectedUnit, cursor_pX, cursor_pY)
+				g.MG.SetUnitPos(selectedUnit, cursor_posXY)
 				g.MG.pc.SetColor(GREEN)
 				g.MG.SetState(SELECTUNIT)
 				g.AppendHistory(g.MG)
-				g.MG.Units[selectedUnit.id].pXAppendHistory(cursor_pX)
-				g.MG.Units[selectedUnit.id].pYAppendHistory(cursor_pY)
+				// g.MG.Units[selectedUnit.id].pXAppendHistory(cursor_pX)
+				// g.MG.Units[selectedUnit.id].pYAppendHistory(cursor_pY)
+				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
 				g.MG.ClearSelectedUnit()
 				g.ActionCounter += 1
 			}

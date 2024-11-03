@@ -29,28 +29,26 @@ type AnimationData struct {
 }
 
 type RenderData struct {
-	_x0         float32
-	_y0         float32
 	x0y0        f64.Vec2
 	idleAnim    AnimationData
 	spritesheet *ebiten.Image
 }
 
+type PosXY [2]int
+
 type Unit struct {
-	id        int
-	pXHistory []int
-	pYHistory []int
-	pX        int
-	pY        int
-	rpg       RPG
-	rd        RenderData
+	id           int
+	posXYHistory []PosXY
+	posXY        PosXY
+	rpg          RPG
+	rd           RenderData
 }
 
-func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, pX, pY int) Unit {
+func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, posXY PosXY) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
-	GridCellStartingX0 := MapStartingX0 + float64(16*pX)
-	GridCellStartingY0 := MapStartingY0 + float64(16*pY)
+	GridCellStartingX0 := MapStartingX0 + float64(16*posXY[0])
+	GridCellStartingY0 := MapStartingY0 + float64(16*posXY[1])
 
 	rd := RenderData{
 		x0y0:        f64.Vec2{GridCellStartingX0, GridCellStartingY0},
@@ -59,24 +57,18 @@ func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, pX, pY int) Unit {
 	}
 
 	u := Unit{
-		id:        id,
-		pXHistory: []int{pX},
-		pYHistory: []int{pY},
-		pX:        pX,
-		pY:        pY,
-		rpg:       rpg,
-		rd:        rd,
+		id:           id,
+		posXYHistory: []PosXY{posXY},
+		posXY:        posXY,
+		rpg:          rpg,
+		rd:           rd,
 	}
 
 	return u
 }
 
-func (u *Unit) pXAppendHistory(pX int) {
-	u.pXHistory = append(u.pXHistory, pX)
-}
-
-func (u *Unit) pYAppendHistory(pY int) {
-	u.pYHistory = append(u.pYHistory, pY)
+func (u *Unit) posXYAppendHistory(posXY PosXY) {
+	u.posXYHistory = append(u.posXYHistory, posXY)
 }
 
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int) {
