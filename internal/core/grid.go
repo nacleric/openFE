@@ -24,7 +24,7 @@ func BFS(grid *MGrid, startRow, startCol int) {
 	visited[startRow][startCol] = true
 
 	for len(queue) > 0 {
-		
+
 	}
 
 	fmt.Println(rows)
@@ -55,7 +55,6 @@ type MGrid struct {
 }
 
 func (mg *MGrid) SearchUnit() {
-
 }
 
 func CreateMGrid(units []*Unit) MGrid {
@@ -225,30 +224,34 @@ func (pc *PlayerCursor) SetColor(rgb RGB) {
 }
 
 func (pc *PlayerCursor) MoveCursorUp() {
-	if pc.posXY[1] > 0 {
+	pY := &pc.posXY[1]
+	if *pY > 0 {
 		pc.SetPrevCursor(pc.posXY)
-		pc.posXY[1] -= 1
+		*pY -= 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorLeft() {
-	if pc.posXY[0] > 0 {
+	pX := &pc.posXY[0]
+	if *pX > 0 {
 		pc.SetPrevCursor(pc.posXY)
-		pc.posXY[1] -= 1
+		*pX -= 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorDown() {
-	if pc.posXY[1] < GRIDSIZE-1 {
+	pY := &pc.posXY[1]
+	if *pY < GRIDSIZE-1 {
 		pc.SetPrevCursor(pc.posXY)
-		pc.posXY[1] += 1
+		*pY += 1
 	}
 }
 
 func (pc *PlayerCursor) MoveCursorRight() {
-	if pc.posXY[0] < GRIDSIZE-1 {
+	pX := &pc.posXY[0]
+	if *pX < GRIDSIZE-1 {
 		pc.SetPrevCursor(pc.posXY)
-		pc.posXY[0] += 1
+		*pX += 1
 	}
 }
 
