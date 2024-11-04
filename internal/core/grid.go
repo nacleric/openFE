@@ -9,6 +9,29 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
+func BFS(grid *MGrid, startRow, startCol int) {
+	rows := GRIDSIZE
+	cols := GRIDSIZE
+
+	queue := []PosXY{{startRow, startCol}}
+	visited := make([][]bool, rows)
+	// fills visited with false 2d array, will have to change to account for objects
+	for i := range visited {
+		visited[i] = make([]bool, cols)
+	}
+
+	// starting position will be true
+	visited[startRow][startCol] = true
+
+	for len(queue) > 0 {
+		
+	}
+
+	fmt.Println(rows)
+	fmt.Println(cols)
+	fmt.Println(queue)
+}
+
 const emptyCell = -1
 
 type GridCell struct {
