@@ -9,11 +9,20 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
-func BFS(grid *MGrid, startRow, startCol int) {
+func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
+	var directions = []PosXY{
+		{0, -1}, // Up
+		{0, 1},  // Down
+		{-1, 0}, // Left
+		{1, 0},  // Right
+	}
+
+	legalPositions := []PosXY{}
+	fmt.Println(legalPositions)
 	rows := GRIDSIZE
 	cols := GRIDSIZE
 
-	queue := []PosXY{{startRow, startCol}}
+	queue := []PosXY{pos}
 	visited := make([][]bool, rows)
 	// fills visited with false 2d array, will have to change to account for objects
 	for i := range visited {
@@ -21,15 +30,28 @@ func BFS(grid *MGrid, startRow, startCol int) {
 	}
 
 	// starting position will be true
-	visited[startRow][startCol] = true
+	visited[pos[1]][pos[0]] = true
 
 	for len(queue) > 0 {
+		// Deque the first cell
+		current := queue[0]
+		queue := queue[1:]
+		col, row := current[0], current[1]
 
+		for _, direction := range directions {
+			newCol, newRow := col+direction[0], row+direction[1]
+
+			// Check if the new cell is within bounds and not yet visited
+			if newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && !visited[newRow][newCol] {
+				// Mark the new cell as visited and enqueue it
+				visited[newRow][newCol] = true
+				queue = append(queue, PosXY{newRow, newCol})
+				legalPositions = append(legalPositions, PosXY{newCol, newRow})
+			}
+		}
 	}
 
-	fmt.Println(rows)
-	fmt.Println(cols)
-	fmt.Println(queue)
+	return legalPositions
 }
 
 const emptyCell = -1
@@ -48,7 +70,7 @@ const notSelected = -1
 
 type MGrid struct {
 	turnState    TurnState
-	grid         [GRIDSIZE][GRIDSIZE]GridCell
+	grid         [][]GridCell
 	pc           PlayerCursor
 	Units        []*Unit
 	selectedUnit int // UnitID, it is -1 if there is no selected unit
@@ -57,11 +79,11 @@ type MGrid struct {
 func (mg *MGrid) SearchUnit() {
 }
 
-func CreateMGrid(units []*Unit) MGrid {
-	var grid [GRIDSIZE][GRIDSIZE]GridCell
+func CreateMGrid(units []*Unit, gridSize int) MGrid {
+	var grid [][]GridCell
 
-	for i := 0; i < GRIDSIZE; i++ {
-		for j := 0; j < GRIDSIZE; j++ {
+	for i := 0; i < gridSize; i++ {
+		for j := 0; j < gridSize; j++ {
 			grid[i][j] = GridCell{
 				unitId: emptyCell,
 			}
@@ -119,7 +141,6 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64) {
 	f32offsetY := float32(offsetY)
 	pX := mg.pc.posXY[0]
 	pY := mg.pc.posXY[1]
-
 	x0y0 := mg.grid[pY][pX].x0y0
 
 	vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
@@ -130,7 +151,6 @@ func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float64, cou
 		pX := unit.posXY[0]
 		pY := unit.posXY[1]
 		unit.rd.x0y0 = mg.grid[pY][pX].x0y0
-
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
