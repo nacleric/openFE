@@ -1,14 +1,31 @@
 package core
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-// [1,2,3]
-// [4,5,6]
-// [7,8,9]
-func reachableCells_test(t *testing.T) {
+func add(a, b int) int {
+	return a + b
+}
+
+func TestAdd(t *testing.T) {
+	// Given
+	a := 1
+	b := 2
+
+	// When
+	r := add(a, b)
+
+	// Then
+	assert.Equal(t, r, 3)
+}
+
+// [(0 0) | (0 1) | (0 2)]
+// [(1 0) | (1 1) | (1 2)]
+// [(2 0) | (2 1) | (2 2)]
+func TestReachableCells(t *testing.T) {
 	// Given
 	maxMoveDistance := 1
 	gridSize := 3
@@ -20,10 +37,12 @@ func reachableCells_test(t *testing.T) {
 	unitPointers := make([]*Unit, len(units))
 
 	grid := CreateMGrid(unitPointers, gridSize)
-	fmt.Println(grid)
+
+	expected_legalPositions := []PosXY{{0, 1}, {2, 1}, {1, 0}, {1, 2}}
 
 	// When
 	sut := reachableCells(&grid, PosXY{1, 1}, maxMoveDistance)
 
 	// Then
+	assert.Equal(t, sut, expected_legalPositions)
 }

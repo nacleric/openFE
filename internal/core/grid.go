@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,6 +8,7 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
+/*
 func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 	var directions = []PosXY{
 		{0, -1}, // Up
@@ -18,7 +18,6 @@ func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 	}
 
 	legalPositions := []PosXY{}
-	fmt.Println(legalPositions)
 	rows := GRIDSIZE
 	cols := GRIDSIZE
 
@@ -53,6 +52,24 @@ func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 
 	return legalPositions
 }
+*/
+
+func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
+	var directions = []PosXY{
+		{0, -1}, // Up
+		{0, 1},  // Down
+		{-1, 0}, // Left
+		{1, 0},  // Right
+	}
+
+	legalPositions := []PosXY{}
+	rows := GRIDSIZE
+	cols := GRIDSIZE
+
+	queue := []PosXY{pos}
+	visited := make([][]bool, rows)
+
+}
 
 const emptyCell = -1
 
@@ -80,9 +97,9 @@ func (mg *MGrid) SearchUnit() {
 }
 
 func CreateMGrid(units []*Unit, gridSize int) MGrid {
-	var grid [][]GridCell
-
+	grid := make([][]GridCell, gridSize)
 	for i := 0; i < gridSize; i++ {
+		grid[i] = make([]GridCell, gridSize) // Initialize each row
 		for j := 0; j < gridSize; j++ {
 			grid[i][j] = GridCell{
 				unitId: emptyCell,
@@ -163,7 +180,6 @@ func (mg *MGrid) SetUnitPos(u *Unit, new_posXY PosXY) {
 
 	// New grid location
 	newGridCellPos.unitId = u.id
-	fmt.Println(newGridCellPos.unitId)
 	u.rd.x0y0 = newGridCellPos.x0y0
 	newPos := PosXY{new_pX, new_pY}
 	u.posXY = newPos
