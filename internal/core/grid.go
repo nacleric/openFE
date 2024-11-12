@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -54,7 +55,22 @@ func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 }
 */
 
-func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
+func isValid(visited [][]bool, col, row int, col_len, row_len int) bool {
+	if (row < 0 || col < 0 || row >= row_len || col >= col_len) {
+		return false
+	}
+
+	if visited[row][col] {
+		return false
+	}
+
+	return true
+}
+
+
+// Need to include maxMove distance
+func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
+	fmt.Println("line 73")
 	var directions = []PosXY{
 		{0, -1}, // Up
 		{0, 1},  // Down
@@ -62,13 +78,43 @@ func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 		{1, 0},  // Right
 	}
 
-	legalPositions := []PosXY{}
-	rows := GRIDSIZE
-	cols := GRIDSIZE
+	// legalPositions := []PosXY{}
+	row_len := gridSize
+	col_len := gridSize
 
 	queue := []PosXY{pos}
-	visited := make([][]bool, rows)
 
+	fmt.Println("line 86")
+	visited := make([][]bool, row_len)
+	for i := 0; i < row_len; i++ {
+		visited[i] = make([]bool, col_len)
+		for j := 0; j < col_len; j++ {
+			visited[i][j] = false
+		}
+	}
+
+	visited[pos[0]][pos[1]] = true
+
+	fmt.Println("line 97")
+	for len(queue) > 0 {
+		current := queue[0]
+		// dequeue first cell
+		queue = queue[1:]
+
+		col, row := current[0], current[1]
+		for _, direction := range directions {
+			adjacentCol, adjacentRow := col + direction[0], row + direction[1]
+			// Check if cell is out of bound
+			fmt.Println(direction,":",isValid(visited, col, row, col_len, row_len))
+			if isValid(visited, col, row, col_len, row_len) {
+				queue = append(queue, PosXY{col, row})
+				visited[adjacentRow][adjacentCol] = true
+				// legalPositions := append(legalPositions, Pos{col, row})
+			}
+		} 
+	}
+	fmt.Println(visited)
+	fmt.Println("ran fine")
 }
 
 const emptyCell = -1

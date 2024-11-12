@@ -126,8 +126,7 @@ func (g *Game) Update() error {
 		cursor_posX := cursor_posXY[0]
 		cursor_posY := cursor_posXY[1]
 		cell := g.MG.QueryCell(cursor_posXY)
-		foo := reachableCells(&g.MG, cursor_posXY, 1)
-		fmt.Println(foo)
+		reachableCells(&g.MG, cursor_posXY, GRIDSIZE)
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)
@@ -149,8 +148,6 @@ func (g *Game) Update() error {
 				g.MG.pc.SetColor(GREEN)
 				g.MG.SetState(SELECTUNIT)
 				g.AppendHistory(g.MG)
-				// g.MG.Units[selectedUnit.id].pXAppendHistory(cursor_pX)
-				// g.MG.Units[selectedUnit.id].pYAppendHistory(cursor_pY)
 				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
 				g.MG.ClearSelectedUnit()
 				g.ActionCounter += 1
