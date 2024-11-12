@@ -56,7 +56,7 @@ func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
 */
 
 func isValid(visited [][]bool, col, row int, col_len, row_len int) bool {
-	if (row < 0 || col < 0 || row >= row_len || col >= col_len) {
+	if row < 0 || col < 0 || row >= row_len || col >= col_len {
 		return false
 	}
 
@@ -66,7 +66,6 @@ func isValid(visited [][]bool, col, row int, col_len, row_len int) bool {
 
 	return true
 }
-
 
 // Need to include maxMove distance
 func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
@@ -103,15 +102,14 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 
 		col, row := current[0], current[1]
 		for _, direction := range directions {
-			adjacentCol, adjacentRow := col + direction[0], row + direction[1]
+			adjacentCol, adjacentRow := col+direction[0], row+direction[1]
 			// Check if cell is out of bound
-			fmt.Println(direction,":",isValid(visited, col, row, col_len, row_len))
-			if isValid(visited, col, row, col_len, row_len) {
-				queue = append(queue, PosXY{col, row})
+			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] {
+				queue = append(queue, PosXY{adjacentCol, adjacentRow})
 				visited[adjacentRow][adjacentCol] = true
-				// legalPositions := append(legalPositions, Pos{col, row})
 			}
-		} 
+			fmt.Println(direction)
+		}
 	}
 	fmt.Println(visited)
 	fmt.Println("ran fine")
