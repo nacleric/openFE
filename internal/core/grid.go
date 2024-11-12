@@ -9,67 +9,8 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
-/*
-func reachableCells(mg *MGrid, pos PosXY, maxMoveDistance int) []PosXY {
-	var directions = []PosXY{
-		{0, -1}, // Up
-		{0, 1},  // Down
-		{-1, 0}, // Left
-		{1, 0},  // Right
-	}
-
-	legalPositions := []PosXY{}
-	rows := GRIDSIZE
-	cols := GRIDSIZE
-
-	queue := []PosXY{pos}
-	visited := make([][]bool, rows)
-	// fills visited with false 2d array, will have to change to account for objects
-	for i := range visited {
-		visited[i] = make([]bool, cols)
-	}
-
-	// starting position will be true
-	visited[pos[1]][pos[0]] = true
-
-	for len(queue) > 0 {
-		// Deque the first cell
-		current := queue[0]
-		queue := queue[1:]
-		col, row := current[0], current[1]
-
-		for _, direction := range directions {
-			newCol, newRow := col+direction[0], row+direction[1]
-
-			// Check if the new cell is within bounds and not yet visited
-			if newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && !visited[newRow][newCol] {
-				// Mark the new cell as visited and enqueue it
-				visited[newRow][newCol] = true
-				queue = append(queue, PosXY{newRow, newCol})
-				legalPositions = append(legalPositions, PosXY{newCol, newRow})
-			}
-		}
-	}
-
-	return legalPositions
-}
-*/
-
-func isValid(visited [][]bool, col, row int, col_len, row_len int) bool {
-	if row < 0 || col < 0 || row >= row_len || col >= col_len {
-		return false
-	}
-
-	if visited[row][col] {
-		return false
-	}
-
-	return true
-}
-
 // Need to include maxMove distance
 func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
-	fmt.Println("line 73")
 	var directions = []PosXY{
 		{0, -1}, // Up
 		{0, 1},  // Down
@@ -83,7 +24,6 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 
 	queue := []PosXY{pos}
 
-	fmt.Println("line 86")
 	visited := make([][]bool, row_len)
 	for i := 0; i < row_len; i++ {
 		visited[i] = make([]bool, col_len)
@@ -94,7 +34,6 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 
 	visited[pos[0]][pos[1]] = true
 
-	fmt.Println("line 97")
 	for len(queue) > 0 {
 		current := queue[0]
 		// dequeue first cell
@@ -111,7 +50,6 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 			fmt.Println(direction)
 		}
 	}
-	fmt.Println(visited)
 	fmt.Println("ran fine")
 }
 
