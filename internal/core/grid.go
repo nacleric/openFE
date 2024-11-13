@@ -10,7 +10,7 @@ import (
 )
 
 // Need to include maxMove distance
-func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
+func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY {
 	var directions = []PosXY{
 		{0, -1}, // Up
 		{0, 1},  // Down
@@ -34,7 +34,9 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 
 	visited[pos[0]][pos[1]] = true
 
-	for len(queue) > 0 {
+	legalPositions := []PosXY{}
+
+	for i := 0; i < maxMoveDistance; i++ {
 		current := queue[0]
 		// dequeue first cell
 		queue = queue[1:]
@@ -42,15 +44,16 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize int) {
 		col, row := current[0], current[1]
 		for _, direction := range directions {
 			adjacentCol, adjacentRow := col+direction[0], row+direction[1]
-			// Check if cell is out of bound
+			// check if cell is out of bound
 			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] {
 				queue = append(queue, PosXY{adjacentCol, adjacentRow})
+				legalPositions = append(legalPositions, PosXY{adjacentCol, adjacentRow})
 				visited[adjacentRow][adjacentCol] = true
 			}
 			fmt.Println(direction)
 		}
 	}
-	fmt.Println("ran fine")
+	return legalPositions
 }
 
 const emptyCell = -1
@@ -73,6 +76,7 @@ type MGrid struct {
 	pc           PlayerCursor
 	Units        []*Unit
 	selectedUnit int // UnitID, it is -1 if there is no selected unit
+	legalPositions []PosXY
 }
 
 func (mg *MGrid) SearchUnit() {
@@ -101,6 +105,7 @@ func CreateMGrid(units []*Unit, gridSize int) MGrid {
 		pc:           PlayerCursor{PosXY{0, 0}, PosXY{0, 0}, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
 		Units:        units,
 		selectedUnit: notSelected,
+		legalPositions: []PosXY{},
 	}
 
 	SetGridCellCoord(&mgrid, MapStartingX0, MapStartingY0)
@@ -182,6 +187,19 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 				incY += 16 * cameraScale
 			}
 		}
+	}
+}
+
+func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64) {
+	f32cameraScale := float32(cameraScale)
+	f32offsetX := float32(offsetX)
+	f32offsetY := float32(offsetY)
+	for _, pos := range mg.legalPositions {
+		pX := pos[0]
+		pY := pos[1]
+		x0y0 := mg.grid[pY][pX].x0y0
+		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
+		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
 	}
 }
 

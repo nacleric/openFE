@@ -68,6 +68,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY)
 	DebugMessages(screen)
 }
 
@@ -126,7 +127,9 @@ func (g *Game) Update() error {
 		cursor_posX := cursor_posXY[0]
 		cursor_posY := cursor_posXY[1]
 		cell := g.MG.QueryCell(cursor_posXY)
-		reachableCells(&g.MG, cursor_posXY, GRIDSIZE)
+		legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+		fmt.Println(legalPositions)
+		g.MG.legalPositions = legalPositions
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)

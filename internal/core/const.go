@@ -1,7 +1,7 @@
 package core
 
 const (
-	GRIDSIZE int = 3
+	GRIDSIZE int = 5
 )
 
 const (
