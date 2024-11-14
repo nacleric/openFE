@@ -9,11 +9,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-func DebugMessages(screen *ebiten.Image) {
+func DebugMessages(screen *ebiten.Image, mg *MGrid) {
 	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
 	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", 0, 32)
 	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", 0, 48)
+	pc_str := fmt.Sprintf("cursor: [%d, %d]", mg.pc.posXY[0], mg.pc.posXY[1])
+	ebitenutil.DebugPrintAt(screen, pc_str, 0, 64)
 }
 
 type Game struct {
@@ -66,10 +68,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
+	g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
-	g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY)
-	DebugMessages(screen)
+	DebugMessages(screen, &g.MG)
 }
 
 func (g *Game) Update() error {
@@ -128,7 +130,7 @@ func (g *Game) Update() error {
 		cursor_posY := cursor_posXY[1]
 		cell := g.MG.QueryCell(cursor_posXY)
 		legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
-		fmt.Println(legalPositions)
+		fmt.Println("legalPositions", legalPositions)
 		g.MG.legalPositions = legalPositions
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {

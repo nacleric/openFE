@@ -18,7 +18,6 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 		{1, 0},  // Right
 	}
 
-	// legalPositions := []PosXY{}
 	row_len := gridSize
 	col_len := gridSize
 
@@ -32,16 +31,18 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 		}
 	}
 
-	visited[pos[0]][pos[1]] = true
+	visited[pos[1]][pos[0]] = true
 
 	legalPositions := []PosXY{}
 
-	for i := 0; i < maxMoveDistance; i++ {
+	for len(queue) > 0 {
 		current := queue[0]
 		// dequeue first cell
 		queue = queue[1:]
 
 		col, row := current[0], current[1]
+		legalPositions = append(legalPositions, PosXY{col, row})
+
 		for _, direction := range directions {
 			adjacentCol, adjacentRow := col+direction[0], row+direction[1]
 			// check if cell is out of bound
@@ -50,7 +51,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 				legalPositions = append(legalPositions, PosXY{adjacentCol, adjacentRow})
 				visited[adjacentRow][adjacentCol] = true
 			}
-			fmt.Println(direction)
+			// fmt.Println(direction)
 		}
 	}
 	return legalPositions
@@ -190,17 +191,25 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 	}
 }
 
-func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64) {
+func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+	if len(mg.legalPositions) == 0 {
+		return
+	}
 	f32cameraScale := float32(cameraScale)
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
-	for _, pos := range mg.legalPositions {
+	// for _, pos := range mg.legalPositions {
+		index := (count / 20) % len(mg.legalPositions)
+
+		// Get position based on calculated index
+		pos := mg.legalPositions[index]
 		pX := pos[0]
 		pY := pos[1]
+		fmt.Println(pX, pY)
 		x0y0 := mg.grid[pY][pX].x0y0
 		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
 		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
-	}
+	// }
 }
 
 func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float64) {
