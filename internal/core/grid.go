@@ -201,7 +201,7 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 
 
 // Actual one
-func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	if len(mg.legalPositions) == 0 {
 		return
 	}
@@ -220,7 +220,7 @@ func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY fl
 
 
 // For visualization
-func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	if len(mg.legalPositions) == 0 {
 		return
 	}
