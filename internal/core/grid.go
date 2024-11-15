@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,7 +8,6 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
-// Need to include maxMove distance
 func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY {
 	var directions = []PosXY{
 		{0, -1}, // Up
@@ -24,34 +22,44 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 	queue := []PosXY{pos}
 
 	visited := make([][]bool, row_len)
+	distance := make([][]int, row_len)
 	for i := 0; i < row_len; i++ {
 		visited[i] = make([]bool, col_len)
-		for j := 0; j < col_len; j++ {
-			visited[i][j] = false
-		}
+		distance[i] = make([]int, col_len)
 	}
 
 	visited[pos[1]][pos[0]] = true
+	distance[pos[1]][pos[0]] = 0  // Start at 0 distance
 
 	legalPositions := []PosXY{}
 
 	for len(queue) > 0 {
 		current := queue[0]
-		// dequeue first cell
+		// Dequeue the first element
 		queue = queue[1:]
 
 		col, row := current[0], current[1]
-		legalPositions = append(legalPositions, PosXY{col, row})
 
+		// If the current position's distance is less than maxMoveDistance, add it to legal positions
+		if distance[row][col] <= maxMoveDistance {
+			legalPositions = append(legalPositions, PosXY{col, row})
+		}
+
+		// If we've reached the maxMoveDistance, stop expanding further from this tile
+		if distance[row][col] >= maxMoveDistance {
+			continue
+		}
+
+		// Explore all neighboring tiles
 		for _, direction := range directions {
 			adjacentCol, adjacentRow := col+direction[0], row+direction[1]
-			// check if cell is out of bound
+
+			// Check if the adjacent cell is within bounds and hasn't been visited
 			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] {
-				queue = append(queue, PosXY{adjacentCol, adjacentRow})
-				legalPositions = append(legalPositions, PosXY{adjacentCol, adjacentRow})
 				visited[adjacentRow][adjacentCol] = true
+				distance[adjacentRow][adjacentCol] = distance[row][col] + 1
+				queue = append(queue, PosXY{adjacentCol, adjacentRow})
 			}
-			// fmt.Println(direction)
 		}
 	}
 	return legalPositions
@@ -191,6 +199,27 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 	}
 }
 
+
+// Actual one
+func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+	if len(mg.legalPositions) == 0 {
+		return
+	}
+	f32cameraScale := float32(cameraScale)
+	f32offsetX := float32(offsetX)
+	f32offsetY := float32(offsetY)
+	for _, pos := range mg.legalPositions {
+		// Get position based on calculated index
+		pX := pos[0]
+		pY := pos[1]
+		x0y0 := mg.grid[pY][pX].x0y0
+		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
+		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
+	}
+}
+
+
+// For visualization
 func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	if len(mg.legalPositions) == 0 {
 		return
@@ -205,7 +234,6 @@ func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY flo
 		pos := mg.legalPositions[index]
 		pX := pos[0]
 		pY := pos[1]
-		fmt.Println(pX, pY)
 		x0y0 := mg.grid[pY][pX].x0y0
 		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
 		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
