@@ -320,6 +320,7 @@ const (
 	BLUE
 )
 
+// Unused currently
 func (pc *PlayerCursor) SetColor(rgb RGB) {
 	var newColor color.Color
 	// might just have all the color options here

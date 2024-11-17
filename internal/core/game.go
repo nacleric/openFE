@@ -69,8 +69,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
 		}
 	}
+
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
-	g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	if g.MG.turnState == UNITACTION {
+		g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	}
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	DebugMessages(screen, &g.MG)
@@ -131,9 +134,6 @@ func (g *Game) Update() error {
 		cursor_posX := cursor_posXY[0]
 		cursor_posY := cursor_posXY[1]
 		cell := g.MG.QueryCell(cursor_posXY)
-		legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
-		fmt.Println("legalPositions", legalPositions)
-		g.MG.legalPositions = legalPositions
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)
@@ -145,6 +145,9 @@ func (g *Game) Update() error {
 		} else if g.MG.turnState == UNITACTION {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
+			legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+			g.MG.legalPositions = legalPositions
+
 			if selectedUnit.posXY[0] == cursor_posX && selectedUnit.posXY[1] == cursor_posY {
 				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 				g.MG.ClearSelectedUnit()
