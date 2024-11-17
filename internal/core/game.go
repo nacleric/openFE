@@ -16,6 +16,8 @@ func DebugMessages(screen *ebiten.Image, mg *MGrid) {
 	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", 0, 48)
 	pc_str := fmt.Sprintf("cursor: [%d, %d]", mg.pc.posXY[0], mg.pc.posXY[1])
 	ebitenutil.DebugPrintAt(screen, pc_str, 0, 64)
+	cameraScale := fmt.Sprintf("CameraScale: [%d]", cameraScale)
+	ebitenutil.DebugPrintAt(screen, cameraScale, 0, 80)
 }
 
 type Game struct {
@@ -69,7 +71,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
-	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY)
+	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	DebugMessages(screen, &g.MG)
 }

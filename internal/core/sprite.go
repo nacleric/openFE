@@ -30,7 +30,7 @@ type AnimationData struct {
 
 type RenderData struct {
 	x0y0        f64.Vec2
-	idleAnim    AnimationData
+	ad    		AnimationData
 	spritesheet *ebiten.Image
 }
 
@@ -52,7 +52,7 @@ func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, posXY PosXY) Unit {
 
 	rd := RenderData{
 		x0y0:        f64.Vec2{GridCellStartingX0, GridCellStartingY0},
-		idleAnim:    idleAnimData,
+		ad:          idleAnimData,
 		spritesheet: spritesheet,
 	}
 
@@ -74,14 +74,15 @@ func (u *Unit) posXYAppendHistory(posXY PosXY) {
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+	// Note: might move render calculation to where it's being called
 	x0 := u.rd.x0y0[0]
 	y0 := u.rd.x0y0[1]
 	op.GeoM.Translate(x0+offsetX, y0+offsetY)
 
-	cellX := u.rd.idleAnim.sc.cellX
-	cellY := u.rd.idleAnim.sc.cellY
+	cellX := u.rd.ad.sc.cellX
+	cellY := u.rd.ad.sc.cellY
 
-	i := (count / u.rd.idleAnim.frameFrequency) % u.rd.idleAnim.frameCount
-	sx, sy := u.rd.idleAnim.sc.GetCol(cellX)+i*u.rd.idleAnim.sc.frameWidth, u.rd.idleAnim.sc.GetRow(cellY)
-	screen.DrawImage(u.rd.spritesheet.SubImage(image.Rect(sx, sy, sx+u.rd.idleAnim.sc.frameWidth, sy+u.rd.idleAnim.sc.frameHeight)).(*ebiten.Image), op)
+	i := (count / u.rd.ad.frameFrequency) % u.rd.ad.frameCount
+	sx, sy := u.rd.ad.sc.GetCol(cellX)+i*u.rd.ad.sc.frameWidth, u.rd.ad.sc.GetRow(cellY)
+	screen.DrawImage(u.rd.spritesheet.SubImage(image.Rect(sx, sy, sx+u.rd.ad.sc.frameWidth, sy+u.rd.ad.sc.frameHeight)).(*ebiten.Image), op)
 }

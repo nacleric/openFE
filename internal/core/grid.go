@@ -2,6 +2,7 @@ package core
 
 import (
 	"image/color"
+	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -91,7 +92,7 @@ type MGrid struct {
 func (mg *MGrid) SearchUnit() {
 }
 
-func CreateMGrid(units []*Unit, gridSize int) MGrid {
+func CreateMGrid(units []*Unit, cursorSprite *ebiten.Image, gridSize int) MGrid {
 	grid := make([][]GridCell, gridSize)
 	for i := 0; i < gridSize; i++ {
 		grid[i] = make([]GridCell, gridSize) // Initialize each row
@@ -108,10 +109,21 @@ func CreateMGrid(units []*Unit, gridSize int) MGrid {
 		grid[pY][pX].unitId = u.id
 	}
 
+	posXY := PosXY{0,0}
+	GridCellStartingX0 := MapStartingX0 + (float64(16*posXY[0])-2)
+   	GridCellStartingY0 := MapStartingY0 + (float64(16*posXY[1])-2)
+
+	ad := AnimationData{SpriteCell{0, 0, 20, 20}, 2, 16}
+	rd := RenderData{
+		x0y0:        f64.Vec2{GridCellStartingX0, GridCellStartingY0},
+		ad:          ad,
+		spritesheet: cursorSprite,
+	}
+
 	mgrid := MGrid{
 		turnState:    SELECTUNIT,
 		grid:         grid,
-		pc:           PlayerCursor{PosXY{0, 0}, PosXY{0, 0}, color.RGBA{R: 0, G: 255, B: 0, A: 255}},
+		pc:           PlayerCursor{PosXY{0, 0}, PosXY{0, 0}, color.RGBA{R: 0, G: 255, B: 0, A: 255}, rd},
 		Units:        units,
 		selectedUnit: notSelected,
 		legalPositions: []PosXY{},
@@ -148,16 +160,25 @@ func (mg *MGrid) ClearSelectedUnit() {
 	mg.selectedUnit = notSelected
 }
 
-func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64) {
-	f32cameraScale := float32(cameraScale)
-	f32offsetX := float32(offsetX)
-	f32offsetY := float32(offsetY)
+func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+	// f32cameraScale := float32(cameraScale)
+	// f32offsetX := float32(offsetX)
+	// f32offsetY := float32(offsetY)
+	// pX := mg.pc.posXY[0]
+	// pY := mg.pc.posXY[1]
+	// x0y0 := mg.grid[pY][pX].x0y0
+
+	// vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
+
 	pX := mg.pc.posXY[0]
 	pY := mg.pc.posXY[1]
-	x0y0 := mg.grid[pY][pX].x0y0
+	x0 := mg.grid[pY][pX].x0y0[0]
+	y0 := mg.grid[pY][pX].x0y0[1]
 
-	vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
+	// Might need to add in more here
+	mg.pc.IdleAnimation(screen, offsetX, offsetY, count, x0, y0)
 }
+
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	for _, unit := range mg.Units {
@@ -271,8 +292,24 @@ const (
 type PlayerCursor struct {
 	posXY       PosXY
 	prevXY      PosXY
-	cursorColor color.Color
+	_cursorColor color.Color //unused rn
+	rd 			RenderData
 }
+
+func (pc *PlayerCursor) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int, x0, y0 float64) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+	pad := float64(2*cameraScale)
+	op.GeoM.Translate(x0+offsetX-pad, y0+offsetY-pad)
+
+	cellX := pc.rd.ad.sc.cellX
+	cellY := pc.rd.ad.sc.cellY
+
+	i := (count / pc.rd.ad.frameFrequency) % pc.rd.ad.frameCount
+	sx, sy := pc.rd.ad.sc.GetCol(cellX)+i*pc.rd.ad.sc.frameWidth, pc.rd.ad.sc.GetRow(cellY)
+	screen.DrawImage(pc.rd.spritesheet.SubImage(image.Rect(sx, sy, sx+pc.rd.ad.sc.frameWidth, sy+pc.rd.ad.sc.frameHeight)).(*ebiten.Image), op)
+}
+
 
 type RGB int
 
@@ -293,7 +330,7 @@ func (pc *PlayerCursor) SetColor(rgb RGB) {
 	} else if rgb == BLUE {
 		newColor = color.RGBA{R: 0, G: 0, B: 255, A: 255}
 	}
-	pc.cursorColor = newColor
+	pc._cursorColor = newColor
 }
 
 func (pc *PlayerCursor) MoveCursorUp() {

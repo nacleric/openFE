@@ -12,11 +12,18 @@ var (
 	LdtkProject *ldtkgo.Project
 	FloorSprite *ebiten.Image
 	UnitSprite  *ebiten.Image
+	CursorSprite *ebiten.Image
 )
 
 func LoadSpritesheets() {
 	var err error
 	UnitSprite, _, err = ebitenutil.NewImageFromFile("../../assets/demo/eliwood_map_idle.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 20x20 offset by 2x2 during render 40 wide for both sprites
+	CursorSprite, _, err = ebitenutil.NewImageFromFile("../../assets/demo/cursor.png")
 	if err != nil {
 		log.Fatal(err)
 	}
