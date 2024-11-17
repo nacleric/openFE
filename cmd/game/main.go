@@ -26,7 +26,7 @@ func init() {
 	for i := range units {
 		unitPointers[i] = &units[i]
 	}
-	mgrid := core.CreateMGrid(unitPointers, core.GRIDSIZE)
+	mgrid := core.CreateMGrid(unitPointers, core.CursorSprite, core.GRIDSIZE)
 
 	game = &core.Game{
 		Camera:  core.Camera{X: 0, Y: 0},
