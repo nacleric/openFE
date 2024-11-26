@@ -30,7 +30,7 @@ func TestReachableCells(t *testing.T) {
 	// Given
 	maxMoveDistance := 1
 	gridSize := 3
-	unitInfo := RPG{Job: NOBLE, Movement: 2}
+	unitInfo := RPG{Job: FOO, Movement: 2}
 	u := CreateUnit(0, UnitSprite, unitInfo, PosXY{0, 1})
 	i := CreateUnit(1, UnitSprite, unitInfo, PosXY{1, 0})
 

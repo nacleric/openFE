@@ -41,7 +41,7 @@ func init() {
 func main() {
 	ebiten.SetWindowSize(core.ScreenWidth*2, core.ScreenHeight*2)
 	ebiten.SetWindowTitle("Platformer")
-	// ebiten.SetFullscreen(true)
+	ebiten.SetFullscreen(true)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

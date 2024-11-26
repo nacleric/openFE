@@ -222,7 +222,7 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 
 
 // Actual one
-func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	if len(mg.legalPositions) == 0 {
 		return
 	}
@@ -241,7 +241,7 @@ func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY flo
 
 
 // For visualization
-func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
+func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	if len(mg.legalPositions) == 0 {
 		return
 	}
@@ -249,15 +249,15 @@ func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY fl
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
 	// for _, pos := range mg.legalPositions {
-		index := (count / 20) % len(mg.legalPositions)
+	index := (count / 10) % len(mg.legalPositions)
 
-		// Get position based on calculated index
-		pos := mg.legalPositions[index]
-		pX := pos[0]
-		pY := pos[1]
-		x0y0 := mg.grid[pY][pX].x0y0
-		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
-		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
+	// Get position based on calculated index
+	pos := mg.legalPositions[index]
+	pX := pos[0]
+	pY := pos[1]
+	x0y0 := mg.grid[pY][pX].x0y0
+	color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
+	vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
 	// }
 }
 

@@ -145,7 +145,7 @@ func (g *Game) Update() error {
 		} else if g.MG.turnState == UNITACTION {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
-			legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+			legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 10)
 			g.MG.legalPositions = legalPositions
 
 			if selectedUnit.posXY[0] == cursor_posX && selectedUnit.posXY[1] == cursor_posY {
