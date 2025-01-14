@@ -280,14 +280,6 @@ func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float64) {
 	}
 }
 
-type TurnState int
-
-const (
-	SELECTUNIT TurnState = iota
-	UNITACTION
-	ACTIONOPTIONS // Unused for now
-)
-
 // Cursor for grid only
 type PlayerCursor struct {
 	posXY       PosXY

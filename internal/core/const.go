@@ -22,3 +22,17 @@ const (
 	MapStartingX0 float64 = 0
 	MapStartingY0         = 0
 )
+
+type TurnState int
+
+const (
+	SELECTUNIT TurnState = iota
+	UNITACTION
+	ACTIONOPTIONS // Unused for now
+)
+
+const (
+	X = 0
+	Y = 1
+)
+
