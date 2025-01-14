@@ -29,8 +29,8 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 		distance[i] = make([]int, col_len)
 	}
 
-	visited[pos[1]][pos[0]] = true
-	distance[pos[1]][pos[0]] = 0  // Start at 0 distance
+	visited[pos[Y]][pos[X]] = true
+	distance[pos[Y]][pos[X]] = 0  // Start at 0 distance
 
 	legalPositions := []PosXY{}
 
@@ -39,7 +39,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 		// Dequeue the first element
 		queue = queue[1:]
 
-		col, row := current[0], current[1]
+		col, row := current[X], current[Y]
 
 		// If the current position's distance is less than maxMoveDistance, add it to legal positions
 		if distance[row][col] <= maxMoveDistance {
@@ -53,7 +53,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 
 		// Explore all neighboring tiles
 		for _, direction := range directions {
-			adjacentCol, adjacentRow := col+direction[0], row+direction[1]
+			adjacentCol, adjacentRow := col+direction[X], row+direction[Y]
 
 			// Check if the adjacent cell is within bounds and hasn't been visited
 			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] {
@@ -104,14 +104,14 @@ func CreateMGrid(units []*Unit, cursorSprite *ebiten.Image, gridSize int) MGrid 
 	}
 
 	for _, u := range units {
-		pX := u.posXY[0]
-		pY := u.posXY[1]
+		pX := u.posXY[X]
+		pY := u.posXY[Y]
 		grid[pY][pX].unitId = u.id
 	}
 
 	posXY := PosXY{0,0}
-	GridCellStartingX0 := MapStartingX0 + (float64(16*posXY[0])-2)
-   	GridCellStartingY0 := MapStartingY0 + (float64(16*posXY[1])-2)
+	GridCellStartingX0 := MapStartingX0 + (float64(16*posXY[X])-2)
+   	GridCellStartingY0 := MapStartingY0 + (float64(16*posXY[Y])-2)
 
 	ad := AnimationData{SpriteCell{0, 0, 20, 20}, 2, 16}
 	rd := RenderData{
@@ -143,8 +143,8 @@ func (mg *MGrid) SetState(ts TurnState) {
 }
 
 func (mg *MGrid) QueryCell(posXY PosXY) GridCell {
-	pX := posXY[0]
-	pY := posXY[1]
+	pX := posXY[X]
+	pY := posXY[Y]
 	return mg.grid[pY][pX]
 }
 
@@ -170,10 +170,10 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64, co
 
 	// vector.StrokeRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, 1, mg.pc.cursorColor, true)
 
-	pX := mg.pc.posXY[0]
-	pY := mg.pc.posXY[1]
-	x0 := mg.grid[pY][pX].x0y0[0]
-	y0 := mg.grid[pY][pX].x0y0[1]
+	pX := mg.pc.posXY[X]
+	pY := mg.pc.posXY[Y]
+	x0 := mg.grid[pY][pX].x0y0[X]
+	y0 := mg.grid[pY][pX].x0y0[Y]
 
 	// Might need to add in more here
 	mg.pc.IdleAnimation(screen, offsetX, offsetY, count, x0, y0)
@@ -182,17 +182,17 @@ func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64, co
 
 func (mg *MGrid) RenderUnits(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	for _, unit := range mg.Units {
-		pX := unit.posXY[0]
-		pY := unit.posXY[1]
+		pX := unit.posXY[X]
+		pY := unit.posXY[Y]
 		unit.rd.x0y0 = mg.grid[pY][pX].x0y0
 		unit.IdleAnimation(screen, offsetX, offsetY, count)
 	}
 }
 
 func (mg *MGrid) SetUnitPos(u *Unit, new_posXY PosXY) {
-	new_pX := new_posXY[0]
-	new_pY := new_posXY[1]
-	mg.ClearGridCell(u.posXY[0], u.posXY[1])
+	new_pX := new_posXY[X]
+	new_pY := new_posXY[Y]
+	mg.ClearGridCell(u.posXY[X], u.posXY[Y])
 	newGridCellPos := &mg.grid[new_pY][new_pX]
 
 	// New grid location
@@ -231,11 +231,11 @@ func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY flo
 	f32offsetY := float32(offsetY)
 	for _, pos := range mg.legalPositions {
 		// Get position based on calculated index
-		pX := pos[0]
-		pY := pos[1]
+		pX := pos[X]
+		pY := pos[Y]
 		x0y0 := mg.grid[pY][pX].x0y0
 		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
-		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
+		vector.DrawFilledRect(screen, float32(x0y0[X])+f32offsetX, float32(x0y0[Y])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
 	}
 }
 
@@ -253,11 +253,11 @@ func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY fl
 
 		// Get position based on calculated index
 		pos := mg.legalPositions[index]
-		pX := pos[0]
-		pY := pos[1]
+		pX := pos[X]
+		pY := pos[Y]
 		x0y0 := mg.grid[pY][pX].x0y0
 		color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
-		vector.DrawFilledRect(screen, float32(x0y0[0])+f32offsetX, float32(x0y0[1])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
+		vector.DrawFilledRect(screen, float32(x0y0[X])+f32offsetX, float32(x0y0[Y])+f32offsetY, 16*f32cameraScale, 16*f32cameraScale, color, true)
 	// }
 }
 
@@ -327,7 +327,7 @@ func (pc *PlayerCursor) SetColor(rgb RGB) {
 }
 
 func (pc *PlayerCursor) MoveCursorUp() {
-	pY := &pc.posXY[1]
+	pY := &pc.posXY[Y]
 	if *pY > 0 {
 		pc.SetPrevCursor(pc.posXY)
 		*pY -= 1
@@ -335,7 +335,7 @@ func (pc *PlayerCursor) MoveCursorUp() {
 }
 
 func (pc *PlayerCursor) MoveCursorLeft() {
-	pX := &pc.posXY[0]
+	pX := &pc.posXY[X]
 	if *pX > 0 {
 		pc.SetPrevCursor(pc.posXY)
 		*pX -= 1
@@ -343,7 +343,7 @@ func (pc *PlayerCursor) MoveCursorLeft() {
 }
 
 func (pc *PlayerCursor) MoveCursorDown() {
-	pY := &pc.posXY[1]
+	pY := &pc.posXY[Y]
 	if *pY < GRIDSIZE-1 {
 		pc.SetPrevCursor(pc.posXY)
 		*pY += 1
@@ -351,7 +351,7 @@ func (pc *PlayerCursor) MoveCursorDown() {
 }
 
 func (pc *PlayerCursor) MoveCursorRight() {
-	pX := &pc.posXY[0]
+	pX := &pc.posXY[X]
 	if *pX < GRIDSIZE-1 {
 		pc.SetPrevCursor(pc.posXY)
 		*pX += 1

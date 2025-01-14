@@ -47,8 +47,8 @@ type Unit struct {
 func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, posXY PosXY) Unit {
 	idleAnimData := AnimationData{SpriteCell{0, 0, 16, 16}, 4, 16}
 
-	GridCellStartingX0 := MapStartingX0 + float64(16*posXY[0])
-	GridCellStartingY0 := MapStartingY0 + float64(16*posXY[1])
+	GridCellStartingX0 := MapStartingX0 + float64(16*posXY[X])
+	GridCellStartingY0 := MapStartingY0 + float64(16*posXY[Y])
 
 	rd := RenderData{
 		x0y0:        f64.Vec2{GridCellStartingX0, GridCellStartingY0},
@@ -75,8 +75,8 @@ func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, cou
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
 	// Note: might move render calculation to where it's being called
-	x0 := u.rd.x0y0[0]
-	y0 := u.rd.x0y0[1]
+	x0 := u.rd.x0y0[X]
+	y0 := u.rd.x0y0[Y]
 	op.GeoM.Translate(x0+offsetX, y0+offsetY)
 
 	cellX := u.rd.ad.sc.cellX

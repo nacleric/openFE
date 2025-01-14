@@ -133,8 +133,8 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_posXY := g.MG.pc.posXY
 		// Note: might be removed
-		cursor_posX := cursor_posXY[0]
-		cursor_posY := cursor_posXY[1]
+		cursor_posX := cursor_posXY[X]
+		cursor_posY := cursor_posXY[Y]
 		cell := g.MG.QueryCell(cursor_posXY)
 		if g.MG.turnState == SELECTUNIT {
 			if cell.unitId != notSelected {
@@ -150,7 +150,7 @@ func (g *Game) Update() error {
 		} else if g.MG.turnState == UNITACTION {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
-			if selectedUnit.posXY[0] == cursor_posX && selectedUnit.posXY[1] == cursor_posY {
+			if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
 				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 				g.MG.ClearSelectedUnit()
 				g.MG.pc.SetColor(GREEN)
