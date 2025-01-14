@@ -139,15 +139,15 @@ func (g *Game) Update() error {
 				g.MG.SetSelectedUnit(cell.unitId)
 				g.MG.pc.SetColor(BLUE)
 				g.MG.SetState(UNITACTION)
+				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+				g.MG.legalPositions = legalPositions
+
 			} else {
 				fmt.Println("No unit found at the selected position")
 			}
 		} else if g.MG.turnState == UNITACTION {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
-			legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
-			g.MG.legalPositions = legalPositions
-
 			if selectedUnit.posXY[0] == cursor_posX && selectedUnit.posXY[1] == cursor_posY {
 				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
 				g.MG.ClearSelectedUnit()
