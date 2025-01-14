@@ -3,6 +3,7 @@ package main
 import (
 	_ "image/png"
 	"log" // Adjust based on where these are defined
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -16,6 +17,11 @@ var (
 
 func init() {
 	core.LoadSpritesheets()
+	fmt.Println(core.SELECTUNIT)
+
+	fmt.Println(core.UNITMOVEMENT)
+
+	fmt.Println(core.UNITACTIONS)
 
 	unitInfo := core.RPG{Job: core.NOBLE, Movement: 2}
 	u := core.CreateUnit(0, core.UnitSprite, unitInfo, core.PosXY{0, 1})
