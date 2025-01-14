@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -131,6 +132,7 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_posXY := g.MG.pc.posXY
+		// Note: might be removed
 		cursor_posX := cursor_posXY[0]
 		cursor_posY := cursor_posXY[1]
 		cell := g.MG.QueryCell(cursor_posXY)
@@ -153,7 +155,8 @@ func (g *Game) Update() error {
 				g.MG.ClearSelectedUnit()
 				g.MG.pc.SetColor(GREEN)
 				g.MG.SetState(SELECTUNIT)
-			} else {
+			} else if slices.Contains(g.MG.legalPositions, cursor_posXY) {
+				fmt.Println("legalMove")
 				g.MG.SetUnitPos(selectedUnit, cursor_posXY)
 				g.MG.pc.SetColor(GREEN)
 				g.MG.SetState(SELECTUNIT)
@@ -161,6 +164,8 @@ func (g *Game) Update() error {
 				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
 				g.MG.ClearSelectedUnit()
 				g.ActionCounter += 1
+			} else {
+				fmt.Println("not legalMove")
 			}
 		}
 	}
