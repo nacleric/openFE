@@ -27,8 +27,8 @@ type TurnState int
 
 const (
 	SELECTUNIT TurnState = iota
-	UNITACTION
-	ACTIONOPTIONS // Unused for now
+	UNITMOVEMENT
+	UNITACTIONS // Unused for now
 )
 
 const (

@@ -72,7 +72,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
-	if g.MG.turnState == UNITACTION {
+	if g.MG.turnState == UNITMOVEMENT {
 		g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	}
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY, g.Count)
@@ -140,14 +140,14 @@ func (g *Game) Update() error {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)
 				g.MG.pc.SetColor(BLUE)
-				g.MG.SetState(UNITACTION)
+				g.MG.SetState(UNITMOVEMENT)
 				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
 				g.MG.legalPositions = legalPositions
 
 			} else {
 				fmt.Println("No unit found at the selected position")
 			}
-		} else if g.MG.turnState == UNITACTION {
+		} else if g.MG.turnState == UNITMOVEMENT {
 			selectedUnitId := g.MG.selectedUnit
 			selectedUnit := g.MG.Units[selectedUnitId]
 			if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
