@@ -130,6 +130,60 @@ func (g *Game) Update() error {
 		fmt.Println("debugger triggered")
 	}
 
+	if g.MG.turnState == SELECTUNIT {
+		cursor_posXY := g.MG.pc.posXY
+		// fmt.Println(cursor_posXY)
+		cell := g.MG.QueryCell(cursor_posXY)
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			fmt.Println("enter is pressed")
+			if cell.unitId != notSelected {
+				g.MG.SetSelectedUnit(cell.unitId)
+				g.MG.pc.SetColor(BLUE)
+				g.MG.SetState(UNITMOVEMENT)
+				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+				g.MG.legalPositions = legalPositions
+			} else {
+				fmt.Println("No unit found at the selected position")
+			}
+		}
+	}
+
+	if g.MG.turnState == UNITMOVEMENT {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			cursor_posXY := g.MG.pc.posXY
+			// Note: might be removed
+			cursor_posX := cursor_posXY[X]
+			cursor_posY := cursor_posXY[Y]
+			// --
+			selectedUnitId := g.MG.selectedUnit
+			selectedUnit := g.MG.Units[selectedUnitId]
+			if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
+				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+				g.MG.ClearSelectedUnit()
+				g.MG.pc.SetColor(GREEN)
+				g.MG.SetState(SELECTUNIT)
+			} else if slices.Contains(g.MG.legalPositions, cursor_posXY) {
+				fmt.Println("legalMove")
+				g.MG.SetUnitPos(selectedUnit, cursor_posXY)
+				g.MG.pc.SetColor(GREEN)
+				g.MG.SetState(SELECTUNIT)
+				g.AppendHistory(g.MG)
+				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
+				g.MG.ClearSelectedUnit()
+				g.ActionCounter += 1
+				// g.MG.SetState(UNITACTIONS)
+			} else {
+				fmt.Println("not legalMove")
+			}
+		}
+	}
+
+	if g.MG.turnState == UNITACTIONS {
+		fmt.Println("select actions for player")
+	}
+
+	// Will need to be refactored. Put state above keypress
+	/*
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cursor_posXY := g.MG.pc.posXY
 		// Note: might be removed
@@ -164,11 +218,15 @@ func (g *Game) Update() error {
 				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
 				g.MG.ClearSelectedUnit()
 				g.ActionCounter += 1
+				// g.MG.SetState(UNITACTIONS)
 			} else {
 				fmt.Println("not legalMove")
 			}
+		} else if g.MG.turnState == UNITACTIONS {
+			fmt.Println("select actions for player")
 		}
 	}
+	*/
 
 	for _, keyPress := range g.Keys {
 		switch keyPress {
