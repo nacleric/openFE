@@ -138,7 +138,7 @@ func (g *Game) Update() error {
 			if cell.unitId != notSelected {
 				g.MG.SetSelectedUnit(cell.unitId)
 				g.MG.pc.SetColor(BLUE)
-				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
+				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 3)
 				g.MG.legalPositions = legalPositions
 				g.MG.SetState(UNITMOVEMENT)
 			} else {

@@ -58,7 +58,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 			adjacentCol, adjacentRow := col+direction[X], row+direction[Y]
 
 			// Check if the adjacent cell is within bounds and hasn't been visited
-			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] {
+			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] && mg.grid[adjacentRow][adjacentCol].cellType != 1 {
 				visited[adjacentRow][adjacentCol] = true
 				distance[adjacentRow][adjacentCol] = distance[row][col] + 1
 				queue = append(queue, PosXY{adjacentCol, adjacentRow})
