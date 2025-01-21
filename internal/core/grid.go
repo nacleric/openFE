@@ -38,7 +38,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 
 	for len(queue) > 0 {
 		current := queue[0]
-		// Dequeue the first element
+		// Dequeue the first element to start the loop
 		queue = queue[1:]
 
 		col, row := current[X], current[Y]
@@ -58,6 +58,7 @@ func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY
 			adjacentCol, adjacentRow := col+direction[X], row+direction[Y]
 
 			// Check if the adjacent cell is within bounds and hasn't been visited
+			// Checks if an object is blocking path, any number thats not 0 on intgrid is an obj
 			if adjacentRow >= 0 && adjacentCol >= 0 && adjacentRow < row_len && adjacentCol < col_len && !visited[adjacentRow][adjacentCol] && mg.grid[adjacentRow][adjacentCol].cellType != 1 {
 				visited[adjacentRow][adjacentCol] = true
 				distance[adjacentRow][adjacentCol] = distance[row][col] + 1
