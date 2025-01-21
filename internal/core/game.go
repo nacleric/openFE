@@ -57,18 +57,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	cameraOffsetX = g.Camera.X * 16 * -1
 	cameraOffsetY = g.Camera.Y * 16 * -1
 
-	for _, layer := range LdtkProject.Levels[0].Layers {
-		for _, tile := range layer.Tiles {
-			x0 := float64(tile.Position[0])
-			y0 := float64(tile.Position[1])
-			op := &ebiten.DrawImageOptions{}
+	for _, tile := range LdtkProject.Levels[0].Layers[1].Tiles {
+		x0 := float64(tile.Position[0])
+		y0 := float64(tile.Position[1])
+		op := &ebiten.DrawImageOptions{}
 
-			// No idea why I needed to divide by camerascale
-			// in order to fix zoomin zoomout when I didn't need to do that for unitsprite
-			op.GeoM.Translate(float64(x0+cameraOffsetX/cameraScale), float64(y0+cameraOffsetY/cameraScale))
-			op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
-			screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
-		}
+		// No idea why I needed to divide by camerascale
+		// in order to fix zoomin zoomout when I didn't need to do that for unitsprite
+		op.GeoM.Translate(float64(x0+cameraOffsetX/cameraScale), float64(y0+cameraOffsetY/cameraScale))
+		op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+		screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
 	}
 
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
@@ -132,6 +130,7 @@ func (g *Game) Update() error {
 
 	enterPressed := inpututil.IsKeyJustPressed(ebiten.KeyEnter)
 
+	// Pick which character to move
 	if g.MG.turnState == SELECTUNIT && enterPressed {
 		cursor_posXY := g.MG.pc.posXY
 		cell := g.MG.QueryCell(cursor_posXY)
@@ -150,6 +149,7 @@ func (g *Game) Update() error {
 		enterPressed = false
 	}
 
+	// Click where to move for picked character
 	if g.MG.turnState == UNITMOVEMENT && enterPressed {
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 			cursor_posXY := g.MG.pc.posXY
@@ -182,55 +182,10 @@ func (g *Game) Update() error {
 		enterPressed = false
 	}
 
+	// Select what to do after moving
 	if g.MG.turnState == UNITACTIONS {
 		fmt.Println("select actions for player")
 	}
-
-	// Will need to be refactored. Put state above keypress
-	/*
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			cursor_posXY := g.MG.pc.posXY
-			// Note: might be removed
-			cursor_posX := cursor_posXY[X]
-			cursor_posY := cursor_posXY[Y]
-			cell := g.MG.QueryCell(cursor_posXY)
-			if g.MG.turnState == SELECTUNIT {
-				if cell.unitId != notSelected {
-					g.MG.SetSelectedUnit(cell.unitId)
-					g.MG.pc.SetColor(BLUE)
-					g.MG.SetState(UNITMOVEMENT)
-					legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 2)
-					g.MG.legalPositions = legalPositions
-
-				} else {
-					fmt.Println("No unit found at the selected position")
-				}
-			} else if g.MG.turnState == UNITMOVEMENT {
-				selectedUnitId := g.MG.selectedUnit
-				selectedUnit := g.MG.Units[selectedUnitId]
-				if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
-					fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
-					g.MG.ClearSelectedUnit()
-					g.MG.pc.SetColor(GREEN)
-					g.MG.SetState(SELECTUNIT)
-				} else if slices.Contains(g.MG.legalPositions, cursor_posXY) {
-					fmt.Println("legalMove")
-					g.MG.SetUnitPos(selectedUnit, cursor_posXY)
-					g.MG.pc.SetColor(GREEN)
-					g.MG.SetState(SELECTUNIT)
-					g.AppendHistory(g.MG)
-					g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
-					g.MG.ClearSelectedUnit()
-					g.ActionCounter += 1
-					// g.MG.SetState(UNITACTIONS)
-				} else {
-					fmt.Println("not legalMove")
-				}
-			} else if g.MG.turnState == UNITACTIONS {
-				fmt.Println("select actions for player")
-			}
-		}
-	*/
 
 	for _, keyPress := range g.Keys {
 		switch keyPress {
