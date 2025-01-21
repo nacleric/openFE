@@ -10,6 +10,7 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
+// Notes: fix gridSize here, will need to be removed
 func reachableCells(mg *MGrid, pos PosXY, gridSize, maxMoveDistance int) []PosXY {
 	var directions = []PosXY{
 		{0, -1}, // Up

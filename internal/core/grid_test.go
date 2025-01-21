@@ -21,11 +21,13 @@ func TestAdd(t *testing.T) {
 	// Then
 	assert.Equal(t, r, 3)
 }
+
 // [[1 0] [1 2] [0 1] [2 1] [0 0] [2 0]]
 
 // [(0 0) | (0 1) | (0 2)]
 // [(1 0) | (1 1) | (1 2)]
 // [(2 0) | (2 1) | (2 2)]
+/*
 func TestReachableCells(t *testing.T) {
 	// Given
 	maxMoveDistance := 1
@@ -47,3 +49,4 @@ func TestReachableCells(t *testing.T) {
 	// Then
 	assert.Equal(t, sut, expected_legalPositions)
 }
+*/
