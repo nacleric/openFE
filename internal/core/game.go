@@ -11,14 +11,15 @@ import (
 )
 
 func DebugMessages(screen *ebiten.Image, mg *MGrid) {
-	ebitenutil.DebugPrintAt(screen, "Q to quit", 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", 0, 16)
-	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", 0, 32)
-	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", 0, 48)
+	pX := ScreenWidth / 2
+	ebitenutil.DebugPrintAt(screen, "Q to quit", pX, 0)
+	ebitenutil.DebugPrintAt(screen, "Arrow Keys to move Camera", pX, 16)
+	ebitenutil.DebugPrintAt(screen, "Z/X ZoomIn/ZoomOut", pX, 32)
+	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", pX, 48)
 	pc_str := fmt.Sprintf("cursor: [%d, %d]", mg.pc.posXY[0], mg.pc.posXY[1])
-	ebitenutil.DebugPrintAt(screen, pc_str, 0, 64)
+	ebitenutil.DebugPrintAt(screen, pc_str, pX, 64)
 	cameraScale := fmt.Sprintf("CameraScale: [%d]", cameraScale)
-	ebitenutil.DebugPrintAt(screen, cameraScale, 0, 80)
+	ebitenutil.DebugPrintAt(screen, cameraScale, pX, 80)
 }
 
 type Game struct {
