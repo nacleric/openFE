@@ -18,7 +18,7 @@ func DebugMessages(screen *ebiten.Image, mg *MGrid) {
 	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", pX, 48)
 	pc_str := fmt.Sprintf("cursor: [%d, %d]", mg.pc.posXY[0], mg.pc.posXY[1])
 	ebitenutil.DebugPrintAt(screen, pc_str, pX, 64)
-	cameraScale := fmt.Sprintf("CameraScale: [%d]", cameraScale)
+	cameraScale := fmt.Sprintf("CameraScale: [%f]", cameraScale)
 	ebitenutil.DebugPrintAt(screen, cameraScale, pX, 80)
 }
 
@@ -174,7 +174,7 @@ func (g *Game) Update() error {
 				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
 				g.MG.ClearSelectedUnit()
 				g.ActionCounter += 1
-				// g.MG.SetState(UNITACTIONS)
+				g.MG.SetState(UNITACTIONS)
 			} else {
 				fmt.Println("not legalMove")
 			}
@@ -204,3 +204,42 @@ func (g *Game) Update() error {
 
 	return nil
 }
+
+type ActionMenu struct {
+	menuOptions  []string
+	selected     int // Index of selected option
+	fadeInFrames int // Fade-in duration
+	frameCount   int // Tracks number of elapsed frames for fade-in
+}
+
+func (m *ActionMenu) Update() {
+	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+		m.selected = (m.selected + 1) % len(m.menuOptions)
+	} else if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+		m.selected = (m.selected - 1 + len(m.menuOptions)) % len(m.menuOptions)
+	}
+
+	if m.frameCount < m.fadeInFrames {
+		m.frameCount++
+	}
+}
+
+/*
+func (m *ActionMenu) Draw(screen *ebiten.Image, x0y0 f64.Vec2) {
+	alpha := 1.0
+	if m.frameCount < m.fadeInFrames {
+		alpha = float64(m.frameCount) / float64(m.fadeInFrames)
+	}
+
+	for i, option := range m.menuOptions {
+		clr := color.RGBA{255, 255, 255, uint8(255 * alpha)}
+		if i == m.selected {
+			clr = color.RGBA{255, 200, 0, uint8(255 * alpha)}
+		}
+
+		x, y := 100, 100+i*30 // Calculate position
+		text.Draw(screen, option, face, x, y, clr)
+
+	}
+}
+*/
