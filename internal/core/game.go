@@ -3,11 +3,14 @@ package core
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/math/f64"
 )
 
 func DebugMessages(screen *ebiten.Image, mg *MGrid) {
@@ -18,8 +21,8 @@ func DebugMessages(screen *ebiten.Image, mg *MGrid) {
 	ebitenutil.DebugPrintAt(screen, "C/V Undo/Redo", pX, 48)
 	pc_str := fmt.Sprintf("cursor: [%d, %d]", mg.pc.posXY[0], mg.pc.posXY[1])
 	ebitenutil.DebugPrintAt(screen, pc_str, pX, 64)
-	cameraScale := fmt.Sprintf("CameraScale: [%f]", cameraScale)
-	ebitenutil.DebugPrintAt(screen, cameraScale, pX, 80)
+	CAMERASCALE := fmt.Sprintf("CameraScale: [%f]", CAMERASCALE)
+	ebitenutil.DebugPrintAt(screen, CAMERASCALE, pX, 80)
 }
 
 type Game struct {
@@ -65,14 +68,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		// No idea why I needed to divide by camerascale
 		// in order to fix zoomin zoomout when I didn't need to do that for unitsprite
-		op.GeoM.Translate(float64(x0+cameraOffsetX/cameraScale), float64(y0+cameraOffsetY/cameraScale))
-		op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+		op.GeoM.Translate(float64(x0+cameraOffsetX/CAMERASCALE), float64(y0+cameraOffsetY/CAMERASCALE))
+		op.GeoM.Scale(float64(CAMERASCALE), float64(CAMERASCALE))
 		screen.DrawImage(FloorSprite.SubImage(image.Rect(tile.Src[0], tile.Src[1], tile.Src[0]+16, tile.Src[1]+16)).(*ebiten.Image), op)
 	}
 
 	RenderGrid(screen, &g.MG, cameraOffsetX, cameraOffsetY)
 	if g.MG.turnState == UNITMOVEMENT {
 		g.MG.RenderLegalPositions(screen, cameraOffsetX, cameraOffsetY, g.Count)
+	}
+
+	if g.MG.turnState == UNITACTIONS {
+		if g.MG.selectedUnit == notSelected { // Make sure a unit is selected
+			g.MG.turnState = SELECTUNIT
+		} else {
+			u := g.MG.Units[g.MG.selectedUnit]
+			actionMenu := ActionMenu{[]string{"foobar"}, 0}
+			actionMenu.Draw(screen, u.rd.x0y0, cameraOffsetX, cameraOffsetY)
+		}
 	}
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY, g.Count)
 	g.MG.RenderUnits(screen, cameraOffsetX, cameraOffsetY, g.Count)
@@ -89,12 +102,12 @@ func (g *Game) Update() error {
 
 	// zoom in
 	if inpututil.IsKeyJustPressed(ebiten.KeyZ) {
-		cameraScale /= .5
+		CAMERASCALE /= .5
 	}
 
 	// zoom out
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) {
-		cameraScale *= .5
+		CAMERASCALE *= .5
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
@@ -135,16 +148,14 @@ func (g *Game) Update() error {
 	if g.MG.turnState == SELECTUNIT && enterPressed {
 		cursor_posXY := g.MG.pc.posXY
 		cell := g.MG.QueryCell(cursor_posXY)
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			if cell.unitId != notSelected {
-				g.MG.SetSelectedUnit(cell.unitId)
-				g.MG.pc.SetColor(BLUE)
-				legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 3)
-				g.MG.legalPositions = legalPositions
-				g.MG.SetState(UNITMOVEMENT)
-			} else {
-				fmt.Println("No unit found at the selected position")
-			}
+		if cell.unitId != notSelected {
+			g.MG.SetSelectedUnit(cell.unitId)
+			g.MG.pc.SetColor(BLUE)
+			legalPositions := reachableCells(&g.MG, cursor_posXY, GRIDSIZE, 3)
+			g.MG.legalPositions = legalPositions
+			g.MG.SetState(UNITMOVEMENT)
+		} else {
+			fmt.Println("No unit found at the selected position")
 		}
 
 		enterPressed = false
@@ -152,40 +163,42 @@ func (g *Game) Update() error {
 
 	// Click where to move for picked character
 	if g.MG.turnState == UNITMOVEMENT && enterPressed {
-		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			cursor_posXY := g.MG.pc.posXY
-			// Note: might be removed
-			cursor_posX := cursor_posXY[X]
-			cursor_posY := cursor_posXY[Y]
-			// --
-			selectedUnitId := g.MG.selectedUnit
-			selectedUnit := g.MG.Units[selectedUnitId]
-			if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
-				fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
-				g.MG.ClearSelectedUnit()
-				g.MG.pc.SetColor(GREEN)
-				g.MG.SetState(SELECTUNIT)
-			} else if slices.Contains(g.MG.legalPositions, cursor_posXY) {
-				fmt.Println("legalMove")
-				g.MG.SetUnitPos(selectedUnit, cursor_posXY)
-				g.MG.pc.SetColor(GREEN)
-				g.MG.SetState(SELECTUNIT)
-				g.AppendHistory(g.MG)
-				g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
-				g.MG.ClearSelectedUnit()
-				g.ActionCounter += 1
-				g.MG.SetState(UNITACTIONS)
-			} else {
-				fmt.Println("not legalMove")
-			}
+		cursor_posXY := g.MG.pc.posXY
+		// Note: might be removed
+		cursor_posX := cursor_posXY[X]
+		cursor_posY := cursor_posXY[Y]
+		// --
+		selectedUnitId := g.MG.selectedUnit
+		selectedUnit := g.MG.Units[selectedUnitId]
+		if selectedUnit.posXY[X] == cursor_posX && selectedUnit.posXY[Y] == cursor_posY {
+			fmt.Println("clicked tile is on the same tile as selected unit, wasting action")
+			g.MG.ClearSelectedUnit()
+			g.MG.pc.SetColor(GREEN)
+			g.MG.SetState(SELECTUNIT)
+		} else if slices.Contains(g.MG.legalPositions, cursor_posXY) {
+			fmt.Println("legalMove")
+			g.MG.SetUnitPos(selectedUnit, cursor_posXY)
+			g.MG.pc.SetColor(GREEN)
+			g.MG.SetState(SELECTUNIT)
+			g.AppendHistory(g.MG)
+			g.MG.Units[selectedUnit.id].posXYAppendHistory(cursor_posXY)
+			// g.MG.ClearSelectedUnit() // This will need to be moved
+			g.ActionCounter += 1
+			g.MG.SetState(UNITACTIONS)
+		} else {
+			fmt.Println("not legalMove")
 		}
 
 		enterPressed = false
 	}
 
 	// Select what to do after moving
-	if g.MG.turnState == UNITACTIONS {
+	if g.MG.turnState == UNITACTIONS && enterPressed {
 		fmt.Println("select actions for player")
+		g.MG.ClearSelectedUnit()
+		g.MG.turnState = SELECTUNIT
+
+		enterPressed = false
 	}
 
 	for _, keyPress := range g.Keys {
@@ -206,22 +219,33 @@ func (g *Game) Update() error {
 }
 
 type ActionMenu struct {
-	menuOptions  []string
-	selected     int // Index of selected option
-	fadeInFrames int // Fade-in duration
-	frameCount   int // Tracks number of elapsed frames for fade-in
+	menuOptions []string
+	selected    int // Index of selected option
+	//fadeInFrames int // Fade-in duration
+	//frameCount   int // Tracks number of elapsed frames for fade-in
 }
 
 func (m *ActionMenu) Update() {
-	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
 		m.selected = (m.selected + 1) % len(m.menuOptions)
-	} else if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
 		m.selected = (m.selected - 1 + len(m.menuOptions)) % len(m.menuOptions)
 	}
+	fmt.Println(m.selected)
 
-	if m.frameCount < m.fadeInFrames {
-		m.frameCount++
-	}
+	/*
+		if m.frameCount < m.fadeInFrames {
+			m.frameCount++
+		}
+	*/
+}
+
+func (m *ActionMenu) Draw(screen *ebiten.Image, x0y0 f64.Vec2, offsetX, offsetY float64) {
+	f32cameraScale := float32(CAMERASCALE)
+	f32offsetX := float32(offsetX)
+	f32offsetY := float32(offsetY)
+	color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
+	vector.DrawFilledRect(screen, float32(x0y0[X])+f32offsetX, float32(x0y0[Y])+f32offsetY, 8*f32cameraScale, 8*f32cameraScale, color, true)
 }
 
 /*

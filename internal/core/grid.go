@@ -193,7 +193,7 @@ func (mg *MGrid) ClearSelectedUnit() {
 }
 
 func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64, count int) {
-	// f32cameraScale := float32(cameraScale)
+	// f32cameraScale := float32(CAMERASCALE)
 	// f32offsetX := float32(offsetX)
 	// f32offsetY := float32(offsetY)
 	// pX := mg.pc.posXY[0]
@@ -242,10 +242,10 @@ func SetGridCellCoord(mg *MGrid, startingX0, startingY0 float64) {
 			y0 := startingY0 + incY
 			mg.grid[row][col].x0y0 = f64.Vec2{x0, y0}
 			if col < GRIDSIZE-1 {
-				incX += 16 * cameraScale // No Idea why I needed to multiply this
+				incX += 16 * CAMERASCALE // No Idea why I needed to multiply this
 			} else {
 				incX = 0
-				incY += 16 * cameraScale
+				incY += 16 * CAMERASCALE
 			}
 		}
 	}
@@ -256,7 +256,7 @@ func (mg *MGrid) RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY flo
 	if len(mg.legalPositions) == 0 {
 		return
 	}
-	f32cameraScale := float32(cameraScale)
+	f32cameraScale := float32(CAMERASCALE)
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
 	for _, pos := range mg.legalPositions {
@@ -274,7 +274,7 @@ func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY fl
 	if len(mg.legalPositions) == 0 {
 		return
 	}
-	f32cameraScale := float32(cameraScale)
+	f32cameraScale := float32(CAMERASCALE)
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
 	// for _, pos := range mg.legalPositions {
@@ -293,17 +293,17 @@ func (mg *MGrid) _RenderLegalPositions(screen *ebiten.Image, offsetX, offsetY fl
 func RenderGrid(screen *ebiten.Image, mg *MGrid, offsetX, offsetY float64) {
 	incX := float64(0)
 	incY := float64(0)
-	f32cameraScale := float32(cameraScale)
+	f32cameraScale := float32(CAMERASCALE)
 	for row := range mg.grid {
 		for col := range mg.grid[row] {
 			x0 := MapStartingX0 + offsetX + incX
 			y0 := MapStartingY0 + offsetY + incY
 			vector.StrokeRect(screen, float32(x0), float32(y0), 16*f32cameraScale, 16*f32cameraScale, 1, color.White, true)
 			if col < GRIDSIZE-1 {
-				incX += 16 * cameraScale
+				incX += 16 * CAMERASCALE
 			} else {
 				incX = 0
-				incY += 16 * cameraScale
+				incY += 16 * CAMERASCALE
 			}
 		}
 	}
@@ -319,8 +319,8 @@ type PlayerCursor struct {
 
 func (pc *PlayerCursor) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int, x0, y0 float64) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
-	pad := float64(2 * cameraScale)
+	op.GeoM.Scale(float64(CAMERASCALE), float64(CAMERASCALE))
+	pad := float64(2 * CAMERASCALE)
 	op.GeoM.Translate(x0+offsetX-pad, y0+offsetY-pad)
 
 	cellX := pc.rd.ad.sc.cellX

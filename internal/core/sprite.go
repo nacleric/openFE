@@ -30,7 +30,7 @@ type AnimationData struct {
 
 type RenderData struct {
 	x0y0        f64.Vec2
-	ad    		AnimationData
+	ad          AnimationData
 	spritesheet *ebiten.Image
 }
 
@@ -73,7 +73,7 @@ func (u *Unit) posXYAppendHistory(posXY PosXY) {
 
 func (u *Unit) IdleAnimation(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(cameraScale), float64(cameraScale))
+	op.GeoM.Scale(float64(CAMERASCALE), float64(CAMERASCALE))
 	// Note: might move render calculation to where it's being called
 	x0 := u.rd.x0y0[X]
 	y0 := u.rd.x0y0[Y]
