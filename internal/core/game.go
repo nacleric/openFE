@@ -190,26 +190,34 @@ func (g *Game) Update() error {
 	}
 
 	// Select what to do after moving
-	if g.MG.turnState == UNITACTIONS && enterPressed {
+	if g.MG.turnState == UNITACTIONS {
 		fmt.Println("select actions for player")
-		g.MG.ClearSelectedUnit()
-		g.MG.turnState = SELECTUNIT
+		g.MenuManager.ActionMenu.Update()
+		if enterPressed {
+			g.MG.ClearSelectedUnit()
+			g.MG.turnState = SELECTUNIT
+			enterPressed = false
 
-		enterPressed = false
+		}
 	}
 
-	for _, keyPress := range g.Keys {
-		switch keyPress {
-		case ebiten.KeyUp:
-			g.Camera.Y += -.25
-		case ebiten.KeyDown:
-			g.Camera.Y += .25
-		case ebiten.KeyLeft:
-			g.Camera.X += -.25
-		case ebiten.KeyRight:
-			g.Camera.X += .25
-		default:
+	// Camera Movement should lock depending on state and do something else
+	// Note: Currently kinda scuffed needs camera to be moved to selectedUnit if it is away
+	if g.MG.turnState != UNITACTIONS {
+		for _, keyPress := range g.Keys {
+			switch keyPress {
+			case ebiten.KeyUp:
+				g.Camera.Y += -.25
+			case ebiten.KeyDown:
+				g.Camera.Y += .25
+			case ebiten.KeyLeft:
+				g.Camera.X += -.25
+			case ebiten.KeyRight:
+				g.Camera.X += .25
+			default:
+			}
 		}
+
 	}
 
 	return nil

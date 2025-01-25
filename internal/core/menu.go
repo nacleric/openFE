@@ -24,10 +24,12 @@ type ActionMenu struct {
 func (m *ActionMenu) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
 		m.Selected = (m.Selected + 1) % len(m.MenuOptions)
+		fmt.Println("in here, arrowRight clicked")
 	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
 		m.Selected = (m.Selected - 1 + len(m.MenuOptions)) % len(m.MenuOptions)
+		fmt.Println("in here, arrowLeft clicked")
+
 	}
-	fmt.Println(m.Selected)
 
 	/*
 		if m.frameCount < m.fadeInFrames {
