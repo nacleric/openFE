@@ -27,10 +27,15 @@ func init() {
 		unitPointers[i] = &units[i]
 	}
 	mgrid := core.CreateMGrid(unitPointers, core.CursorSprite, core.LdtkProject)
+
+	actionMenu := core.ActionMenu{MenuOptions: []string{"foobar"}, Selected: 0}
+	menuManager := core.MenuManager{ActionMenu: actionMenu}
+
 	game = &core.Game{
-		Camera:  core.Camera{X: 0, Y: 0},
-		MG:      mgrid,
-		History: []core.MGrid{},
+		Camera:      core.Camera{X: 0, Y: 0},
+		MG:          mgrid,
+		History:     []core.MGrid{},
+		MenuManager: menuManager,
 	}
 
 	game.AppendHistory(game.MG)
