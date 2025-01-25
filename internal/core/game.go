@@ -245,9 +245,16 @@ func (m *ActionMenu) Draw(screen *ebiten.Image, x0y0 f64.Vec2, offsetX, offsetY 
 	f32offsetX := float32(offsetX)
 	f32offsetY := float32(offsetY)
 	padX := float32(6 * f32cameraScale)
-	padY := float32(18 * f32cameraScale)
+	padY := float32(20 * f32cameraScale)
+	gap := float32(1 * f32cameraScale)
+	padXgap := float32(8*f32cameraScale) + gap
+
+	startLocationX := float32(x0y0[X]) + f32offsetX - padX
 	color := color.RGBA{R: 25, G: 0, B: 255, A: 5}
-	vector.DrawFilledRect(screen, float32(x0y0[X])+f32offsetX-padX, float32(x0y0[Y])+f32offsetY+padY, 8*f32cameraScale, 8*f32cameraScale, color, true)
+	vector.DrawFilledRect(screen, startLocationX, float32(x0y0[Y])+f32offsetY+padY, 8*f32cameraScale, 8*f32cameraScale, color, true)
+	vector.DrawFilledRect(screen, startLocationX+padXgap, float32(x0y0[Y])+f32offsetY+padY, 8*f32cameraScale, 8*f32cameraScale, color, true)
+	vector.DrawFilledRect(screen, startLocationX+(padXgap*2), float32(x0y0[Y])+f32offsetY+padY, 8*f32cameraScale, 8*f32cameraScale, color, true)
+
 }
 
 /*
