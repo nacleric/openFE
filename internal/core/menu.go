@@ -1,10 +1,10 @@
 package core
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/math/f64"
 )
@@ -22,24 +22,21 @@ type ActionMenu struct {
 }
 
 func (m *ActionMenu) Update() {
-	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		m.Selected = (m.Selected + 1) % len(m.MenuOptions)
-		fmt.Println("in here, arrowRight clicked")
-	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		m.Selected = (m.Selected - 1 + len(m.MenuOptions)) % len(m.MenuOptions)
-		fmt.Println("in here, arrowLeft clicked")
-
+	isArrowLeftPressed := inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft)
+	if isArrowLeftPressed {
+		if m.Selected != 0 {
+			m.Selected = (m.Selected - 1 + len(m.MenuOptions)) % len(m.MenuOptions)
+		}
+		isArrowLeftPressed = false
 	}
 
-	/*
-		if m.frameCount < m.fadeInFrames {
-			m.frameCount++
+	isArrowRightPressed := inpututil.IsKeyJustPressed(ebiten.KeyArrowRight)
+	if isArrowRightPressed {
+		if m.Selected != len(m.MenuOptions)-1 {
+			m.Selected = (m.Selected + 1) % len(m.MenuOptions)
 		}
-	*/
-}
-
-func (m *ActionMenu) Reset() {
-	m.Selected = 0
+		isArrowRightPressed = false
+	}
 }
 
 func (m *ActionMenu) Draw(screen *ebiten.Image, x0y0 f64.Vec2, offsetX, offsetY float64) {

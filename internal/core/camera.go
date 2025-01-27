@@ -5,7 +5,7 @@ var (
 	cameraWidth  float64 = 16
 	cameraHeight float64 = 8
 	// CAMERASCALE          = float64(ScreenWidth) / TileSize / cameraWidth
-	CAMERASCALE = float64(4)
+	CAMERASCALE = float64(2)
 )
 
 type Camera struct {

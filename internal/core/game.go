@@ -191,13 +191,12 @@ func (g *Game) Update() error {
 
 	// Select what to do after moving
 	if g.MG.turnState == UNITACTIONS {
-		fmt.Println("select actions for player")
+		// fmt.Println("select actions for player")
 		g.MenuManager.ActionMenu.Update()
 		if enterPressed {
 			g.MG.ClearSelectedUnit()
 			g.MG.turnState = SELECTUNIT
 			enterPressed = false
-
 		}
 	}
 
@@ -217,7 +216,6 @@ func (g *Game) Update() error {
 			default:
 			}
 		}
-
 	}
 
 	return nil

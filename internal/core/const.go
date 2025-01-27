@@ -8,8 +8,8 @@ const (
 	TileSize float64 = 16
 	// ScreenWidth  int     = 256 * 2
 	// ScreenHeight int     = 128 * 2
-	ScreenWidth  int = 800
-	ScreenHeight int = 600
+	ScreenWidth  int = 400
+	ScreenHeight int = 300
 )
 
 // Map Stuff
