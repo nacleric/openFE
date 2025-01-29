@@ -92,18 +92,21 @@ func (m *ActionMenu) DrawMenu(screen *ebiten.Image, x0y0 f64.Vec2, offsetX, offs
 
 func (m *ActionMenu) IdleAnimation(screen *ebiten.Image, count int, x0, y0 float32, index int) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(CAMERASCALE/2), float64(CAMERASCALE/2))
-	// Note: might move render calculation to where it's being called
-	op.GeoM.Translate(float64(x0), float64(y0))
 
 	cellX := m.rds[index].ad.sc.cellX
 	cellY := m.rds[index].ad.sc.cellY
 
 	if m.Selected == index {
+		op.GeoM.Scale(float64(CAMERASCALE/1.75), float64(CAMERASCALE/1.75))
+		op.GeoM.Translate(float64(x0)-CAMERASCALE, float64(y0)-CAMERASCALE)
+
 		i := (count / m.rds[index].ad.frameFrequency) % m.rds[index].ad.frameCount
 		sx, sy := m.rds[index].ad.sc.GetCol(cellX)+i*m.rds[index].ad.sc.frameWidth, m.rds[index].ad.sc.GetRow(cellY)
 		screen.DrawImage(m.rds[index].spritesheet.SubImage(image.Rect(sx, sy, sx+m.rds[index].ad.sc.frameWidth, sy+m.rds[index].ad.sc.frameHeight)).(*ebiten.Image), op)
 	} else {
+		op.GeoM.Scale(float64(CAMERASCALE/2), float64(CAMERASCALE/2))
+		op.GeoM.Translate(float64(x0), float64(y0))
+
 		i := 0
 		sx, sy := m.rds[index].ad.sc.GetCol(cellX)+i*m.rds[index].ad.sc.frameWidth, m.rds[index].ad.sc.GetRow(cellY)
 		screen.DrawImage(m.rds[index].spritesheet.SubImage(image.Rect(sx, sy, sx+m.rds[index].ad.sc.frameWidth, sy+m.rds[index].ad.sc.frameHeight)).(*ebiten.Image), op)
