@@ -81,7 +81,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.MG.turnState = SELECTUNIT
 		} else {
 			u := g.MG.Units[g.MG.selectedUnit]
-			g.MenuManager.ActionMenu.Draw(screen, u.rd.x0y0, cameraOffsetX, cameraOffsetY)
+			g.MenuManager.ActionMenu.DrawMenu(screen, u.rd.x0y0, cameraOffsetX, cameraOffsetY, g.Count)
 		}
 	}
 	g.MG.RenderCursor(screen, cameraOffsetX, cameraOffsetY, g.Count)

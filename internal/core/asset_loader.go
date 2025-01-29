@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	LdtkProject *ldtkgo.Project
-	FloorSprite *ebiten.Image
-	UnitSprite  *ebiten.Image
-	CursorSprite *ebiten.Image
+	LdtkProject      *ldtkgo.Project
+	FloorSprite      *ebiten.Image
+	UnitSprite       *ebiten.Image
+	CursorSprite     *ebiten.Image
+	ActionMenuSprite *ebiten.Image
 )
 
 func LoadSpritesheets() {
@@ -37,4 +38,10 @@ func LoadSpritesheets() {
 	if err != nil {
 		panic("Tilemap doesn't exist")
 	}
+
+	ActionMenuSprite, _, err = ebitenutil.NewImageFromFile("assets/demo/actionmenu_sprites.png")
+	if err != nil {
+		panic("Tilemap doesn't exist")
+	}
+
 }

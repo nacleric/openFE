@@ -192,6 +192,7 @@ func (mg *MGrid) ClearSelectedUnit() {
 	mg.selectedUnit = notSelected
 }
 
+// This might be more generalized and seperated from mgrid
 func (mg *MGrid) RenderCursor(screen *ebiten.Image, offsetX, offsetY float64, count int) {
 	// f32cameraScale := float32(CAMERASCALE)
 	// f32offsetX := float32(offsetX)

@@ -23,9 +23,9 @@ func (sc *SpriteCell) GetCol(cellX int) int {
 }
 
 type AnimationData struct {
-	sc             SpriteCell
-	frameCount     int // Total number of columns for specific row
-	frameFrequency int // How often frames transition
+	sc             SpriteCell // 0 0 16 16
+	frameCount     int        // Total number of columns for specific row
+	frameFrequency int        // How often frames transition
 }
 
 type RenderData struct {
@@ -41,7 +41,7 @@ type Unit struct {
 	posXYHistory []PosXY
 	posXY        PosXY
 	rpg          RPG
-	rd           RenderData
+	rd           RenderData // Note: Can be optional
 }
 
 func CreateUnit(id int, spritesheet *ebiten.Image, rpg RPG, posXY PosXY) Unit {

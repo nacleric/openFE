@@ -28,7 +28,7 @@ func init() {
 	}
 	mgrid := core.CreateMGrid(unitPointers, core.CursorSprite, core.LdtkProject)
 
-	actionMenu := core.ActionMenu{MenuOptions: []string{"attack", "items", "skip"}, Selected: 0}
+	actionMenu := core.CreateActionMenu(core.ActionMenuSprite)
 	menuManager := core.MenuManager{ActionMenu: actionMenu}
 
 	game = &core.Game{
